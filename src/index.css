@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+.custom-color {
+  background-color: rgb(222, 220, 249);
+}
+
+.spacer {
+  height: 5rem;
+}
+
 /* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

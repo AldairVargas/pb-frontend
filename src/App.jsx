@@ -1,11 +1,22 @@
 import React from "react";
 
 import "./App.css";
+import Navbar from "./components/navbar";
+import Hero from "./components/hero";
+import Services from "./components/services";
+import Catalog from "./components/catalog";
+import Contact from "./components/contact";
+import MyOffert from "./components/offert";
 
 function App() {
   return (
     <>
-      <h1 class="text-3xl font-bold underline bg-indigo-500">Hello world!</h1>
+      <Navbar />
+      <Hero />
+      <Services />
+      <Catalog />
+      <Contact />
+      <MyOffert />
     </>
   );
 }
