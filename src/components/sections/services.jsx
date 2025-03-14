@@ -1,11 +1,11 @@
 import React from "react";
 
-import "../index.css";
-import CardServices from "./cardServices";
+import "../../index.css"; 
+import CardServices from "../ui/cardServices.jsx";
 
 const OurServices = () => {
   return (
-    <div className="w-full mx-auto mt-8">
+    <div id="servicios" className="w-full mx-auto mt-8">
       <div className="spacer"></div>
       <div className="flex flex-col justify-center">
         <h1 className="font-bold text-center text-5xl">Nuestros Servicios</h1>

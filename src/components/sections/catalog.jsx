@@ -1,9 +1,9 @@
 import React from "react";
-import CardWarehouse from "./cardWarehouse";
+import CardWarehouse from "../ui/cardWarehouse.jsx";
 
 const MyCatalog = () => {
   return (
-    <div className="w-full min-h-screen bg-gray-100 py-12">
+    <div id="catalog" className="w-full min-h-screen bg-gray-100 py-12">
       <div className="container mx-auto px-6">
         <div className="flex flex-col justify-center text-start max-w-screen-xl mx-auto">
           <h1 className="text-4xl font-bold">Catálogo de Bodegas</h1>
