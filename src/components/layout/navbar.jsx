@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Warehouse, Menu, X } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const MyNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,16 +49,10 @@ const MyNavbar = () => {
               Servicios
             </a>
             <a
-              href="#catalogo"
+              href="#catalog"
               className="text-sm text-gray-700 transition-colors hover:text-blue-600"
             >
               Catálogo
-            </a>
-            <a
-              href="#opiniones"
-              className="text-sm text-gray-700 transition-colors hover:text-blue-600"
-            >
-              Opiniones
             </a>
             <a
               href="#contacto"
@@ -65,6 +60,12 @@ const MyNavbar = () => {
             >
               Contacto
             </a>
+            <Link
+              to={"/login"}
+              className="text-sm text-gray-700 transition-colors hover:text-blue-600"
+            >
+              Iniciar sesion
+            </Link>
             <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300">
               Reservar Ahora
             </button>
@@ -89,18 +90,11 @@ const MyNavbar = () => {
                 Servicios
               </a>
               <a
-                href="#catalogo"
+                href="#catalog"
                 className="text-sm text-gray-700 transition-colors hover:text-blue-600"
                 onClick={() => setIsOpen(false)}
               >
                 Catálogo
-              </a>
-              <a
-                href="#opiniones"
-                className="text-sm text-gray-700 transition-colors hover:text-blue-600"
-                onClick={() => setIsOpen(false)}
-              >
-                Opiniones
               </a>
               <a
                 href="#contacto"
@@ -109,6 +103,13 @@ const MyNavbar = () => {
               >
                 Contacto
               </a>
+              <Link
+                to="/login"
+                className="text-sm text-gray-700 transition-colors hover:text-blue-600"
+                onClick={() => setIsOpen(false)}
+              >
+                Inciar sesión
+              </Link>
               <button
                 className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300"
                 onClick={() => setIsOpen(false)}

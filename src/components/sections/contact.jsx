@@ -3,7 +3,7 @@ import { Phone, MapPin } from "lucide-react";
 
 const MyContact = () => {
   return (
-    <div className="w-full min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-12">
+    <div id="contacto" className="w-full min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-12">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
           {/* Sección de Información */}
