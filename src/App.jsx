@@ -3,6 +3,7 @@ import Landing from "./components/pages/landing";
 import Login from "./components/pages/login";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import DashboardAdminSede from "./components/pages/dashboardAdminSede";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<DashboardAdminSede/>} />
         </Routes>
       </Router>
     </>
