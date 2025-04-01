@@ -14,7 +14,7 @@ const MyHero = () => {
           </div>
           <div className="mt-6 w-full">
             <h1 className="font-extrabold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight">
-              El espacio que <span className="text-blue-600">necesitas</span> 
+              El espacio que <span className="text-blue-600">necesitas </span>  
               para lo que <span className="text-blue-600">valoras</span>
             </h1>
           </div>
