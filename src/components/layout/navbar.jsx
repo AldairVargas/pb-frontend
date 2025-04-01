@@ -66,9 +66,11 @@ const MyNavbar = () => {
             >
               Iniciar sesion
             </Link>
-            <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300">
-              Reservar Ahora
-            </button>
+            <Link to={"/login"}>
+              <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300">
+                Reservar Ahora
+              </button>
+            </Link>
           </nav>
         </div>
 
