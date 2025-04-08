@@ -1,5 +1,5 @@
+import { useEffect } from "react";
 import CardWarehouse from "../ui/cardWarehouse";
-import { Carousel } from "flowbite-react";
 
 const customWarehouseData = [
   {
@@ -35,27 +35,86 @@ const customWarehouseData = [
 ];
 
 export default function WarehouseGallery() {
+  useEffect(() => {
+    import("flowbite").then((m) => m.initCarousels());
+  }, []);
+
   return (
-    <div className="pt-16 md:pt-20 px-0 sm:px-6 py-8">
-      {/* Carrusel Full Width */}
-      <div className="w-full h-[300px] sm:h-[400px] md:h-[500px] xl:h-[600px] 2xl:h-[700px]">
-        <Carousel
-          slide={true}
-          className="rounded-none"
-        >
-          {customWarehouseData.map((warehouse) => (
-            <img
-              key={warehouse.id}
-              src={warehouse.image}
-              alt={warehouse.name}
-              className="w-full h-full object-cover"
-            />
+    <div className="pt-16 md:pt-16">
+      <div
+        id="animation-carousel"
+        className="relative w-full"
+        data-carousel="slide" // Cambiado de 'static' a 'slide' para autoplay
+      >
+        {/* Carousel wrapper */}
+        <div className="relative h-56 overflow-hidden md:h-96">
+          {customWarehouseData.map((item, index) => (
+            <div
+              key={item.id}
+              className={`${
+                index === 0 ? "" : "hidden"
+              } duration-200 ease-linear`}
+              data-carousel-item={index === 0 ? "active" : ""}
+            >
+              <img
+                src={item.image}
+                alt={item.name}
+                className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
+              />
+            </div>
           ))}
-        </Carousel>
+        </div>
+
+        {/* Slider controls */}
+        <button
+          type="button"
+          className="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+          data-carousel-prev
+        >
+          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 group-hover:bg-white/50 dark:group-hover:bg-blue-700 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70">
+            <svg
+              className="w-4 h-4 text-white rtl:rotate-180"
+              fill="none"
+              viewBox="0 0 6 10"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M5 1 1 5l4 4"
+              />
+            </svg>
+            <span className="sr-only">Previous</span>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          className="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+          data-carousel-next
+        >
+          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 group-hover:bg-white/50 dark:group-hover:bg-blue-700 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70">
+            <svg
+              className="w-4 h-4 text-white rtl:rotate-180"
+              fill="none"
+              viewBox="0 0 6 10"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="m1 9 4-4-4-4"
+              />
+            </svg>
+            <span className="sr-only">Next</span>
+          </span>
+        </button>
       </div>
 
-      {/* Cards debajo */}
-      <div className="px-6">
+      {/* Cards abajo */}
+      <div className="px-6 mt-8">
         <CardWarehouse data={customWarehouseData} />
       </div>
     </div>
