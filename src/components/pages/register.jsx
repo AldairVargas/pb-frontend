@@ -35,7 +35,7 @@ const RegisterSchema = Yup.object().shape({
     .required("Debes aceptar los términos y condiciones"),
 });
 
-const MyRegister = () => {
+const MyRegister = ({ onSwitchForm }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (values, { setSubmitting }) => {
@@ -250,12 +250,13 @@ const MyRegister = () => {
                       {/* Login link */}
                       <p className="text-center mt-4 text-sm">
                         ¿Ya tienes una cuenta?{" "}
-                        <Link
-                          to="/login"
+                        <button
+                          type="button"
+                          onClick={onSwitchForm}
                           className="text-black font-medium hover:underline"
                         >
                           Inicia sesión
-                        </Link>
+                        </button>
                       </p>
                     </Form>
                   )}

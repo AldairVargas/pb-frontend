@@ -10,8 +10,9 @@ import {
   Menu,
   Warehouse
 } from "lucide-react";
+import { motion } from "framer-motion"; // 👈 Agregado
 
-const sidebarAdmin = () => {
+const SidebarAdmin = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   // Cierra el menú si se hace clic fuera
@@ -54,14 +55,18 @@ const sidebarAdmin = () => {
         <NavLinks />
       </aside>
 
-      {/* Menú desplegable móvil */}
+      {/* Menú desplegable móvil con animación */}
       {isOpen && (
-        <div
+        <motion.div
           id="mobile-menu"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
           className="fixed top-16 left-0 right-0 bottom-0 bg-white border-t shadow z-40 overflow-y-auto md:hidden"
         >
           <NavLinks onClick={() => setIsOpen(false)} />
-        </div>
+        </motion.div>
       )}
 
       {/* Espaciado para evitar que el contenido quede detrás de la navbar */}
@@ -99,4 +104,4 @@ const NavLinks = ({ onClick }) => (
   </nav>
 );
 
-export default sidebarAdmin;
+export default SidebarAdmin;
