@@ -6,16 +6,14 @@ import "../../index.css";
 import { Link } from "react-router-dom";
 
 const LoginSchema = Yup.object().shape({
-  email: Yup.string()
-    .email("Email inválido")
-    .required("Email es requerido"),
+  email: Yup.string().email("Email inválido").required("Email es requerido"),
   password: Yup.string()
     .min(8, "La contraseña debe tener al menos 8 caracteres")
     .required("Contraseña es requerida"),
-  remember: Yup.boolean()
+  remember: Yup.boolean(),
 });
 
-const MyLogin = () => {
+const MyLogin = ({ onSwitchForm }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (values, { setSubmitting }) => {
@@ -72,7 +70,7 @@ const MyLogin = () => {
                   initialValues={{
                     email: "",
                     password: "",
-                    remember: false
+                    remember: false,
                   }}
                   validationSchema={LoginSchema}
                   onSubmit={handleSubmit}
@@ -86,7 +84,9 @@ const MyLogin = () => {
                           name="email"
                           id="floating_email"
                           className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-black peer ${
-                            errors.email && touched.email ? "border-red-500" : ""
+                            errors.email && touched.email
+                              ? "border-red-500"
+                              : ""
                           }`}
                           placeholder=" "
                         />
@@ -97,7 +97,9 @@ const MyLogin = () => {
                           Correo Electrónico
                         </label>
                         {errors.email && touched.email && (
-                          <p className="mt-1 text-xs text-red-500">{errors.email}</p>
+                          <p className="mt-1 text-xs text-red-500">
+                            {errors.email}
+                          </p>
                         )}
                       </div>
 
@@ -108,7 +110,9 @@ const MyLogin = () => {
                           name="password"
                           id="floating_password"
                           className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-black peer ${
-                            errors.password && touched.password ? "border-red-500 pr-20" : "pr-10"
+                            errors.password && touched.password
+                              ? "border-red-500 pr-20"
+                              : "pr-10"
                           }`}
                           placeholder=" "
                         />
@@ -126,7 +130,9 @@ const MyLogin = () => {
                           {showPassword ? <EyeClosed /> : <Eye />}
                         </button>
                         {errors.password && touched.password && (
-                          <p className="mt-1 text-xs text-red-500">{errors.password}</p>
+                          <p className="mt-1 text-xs text-red-500">
+                            {errors.password}
+                          </p>
                         )}
                       </div>
 
@@ -164,12 +170,13 @@ const MyLogin = () => {
                       {/* Registration link */}
                       <p className="text-center mt-4 text-sm">
                         ¿No tienes una cuenta?{" "}
-                        <Link
-                          to="/register"
+                        <button
+                          type="button"
+                          onClick={onSwitchForm}
                           className="text-black font-medium hover:underline"
                         >
                           Regístrate
-                        </Link>
+                        </button>
                       </p>
                     </Form>
                   )}
