@@ -9,6 +9,7 @@ import DashboardAdminSede from "./components/pages/dashboardAdminSede";
 import DashboardAdmin from "./components/pages/dashboardAdmin"
 import AuthPage from "./components/pages/Auth";
 import WarehouseGallery from "./components/pages/warehouseGallery";
+import WarehouseDetail from "./components/pages/warehouseDetail";
 
 // Create a wrapper component for the Navbar
 const NavbarWrapper = () => {
@@ -25,10 +26,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<AuthPage />} />
-        {/* <Route path="/register" element={<MyRegister />} /> */}
         <Route path="/dashboard" element={<DashboardAdminSede/>} />
         <Route path="/admin" element={<DashboardAdmin/>} />
         <Route path="/gallery" element={<WarehouseGallery/>} />
+        <Route path="/warehouse/:id" element={<WarehouseDetail />} />
       </Routes>
     </Router>
   );
