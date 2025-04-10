@@ -51,7 +51,7 @@ export default function footer() {
           </div>
           <hr className="my-6 border-gray-600 sm:mx-auto lg:my-8" />
           <span className="block text-sm text-gray-600 text-center">
-            © 2023{" "}
+            © 2025{" "}
             <a href="#" className="hover:underline hover:text-blue-600">
               BodegaSegura™
             </a>

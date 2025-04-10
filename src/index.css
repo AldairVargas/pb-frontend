@@ -13,14 +13,20 @@ html {
 }
 
 .bg-image {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-                    url("src/assets/images/warehouse.png");
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    url("/src/assets/images/warehouse.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-
+.hero {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    url("/src/assets/images/hero.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 
 /* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;

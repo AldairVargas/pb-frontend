@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const MyOffert = () => {
   return (
@@ -11,9 +12,11 @@ const MyOffert = () => {
           Reserva ahora y obtén un 10% de descuento en tu primer mes. Oferta por
           tiempo limitado.
         </p>
+        <Link to={"/auth"}>
         <button className="mt-4 px-6 py-3 text-sm font-medium bg-white  rounded-md shadow-md transition-all duration-300 hover:bg-gray-200">
           Reservar mi bodega
         </button>
+        </Link>
       </div>
     </div>
   );
