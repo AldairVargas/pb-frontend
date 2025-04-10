@@ -3,9 +3,10 @@ import { Warehouse, Eye, EyeClosed } from "lucide-react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import "../../index.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import useCRUD from "../../hooks/useCRUD";
 import { toast } from "react-toastify";
+import { useAuth } from "../../context/AuthContext";
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Email inválido").required("Email es requerido"),
@@ -19,6 +20,8 @@ const MyLogin = ({ onSwitchForm }) => {
   const [showPassword, setShowPassword] = useState(false);
   const { saveData } = useCRUD();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
@@ -29,19 +32,26 @@ const MyLogin = ({ onSwitchForm }) => {
       );
 
       if (response && response.token) {
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
+        const userRole = response.user.Role.role_name;
+        const userData = {
+          id: response.user.id,
+          email: response.user.email,
+          name: response.user.first_name,
+          lastname: response.user.last_name,
+          phone: response.user.phone,
+          role: response.user.Role
+        };
+        login(response.token, userRole, userData);
         toast.success('¡Bienvenido!');
         
-        const roleRoutes = {
-          'User': '/',
-          'Admin': '/admin',
-          'SuperAdmin': '/dashboard'
-        };
-        
-        const route = roleRoutes[response.user.Role.role_name];
-        if (route) {
-          navigate(route);
+        // Redirigir basado en el rol y la ubicación anterior
+        const from = location.state?.from?.pathname || '/';
+        if (userRole === 'Admin') {
+          navigate('/dashboard');
+        } else if (userRole === 'SuperAdmin') {
+          navigate('/admin');
+        } else {
+          navigate(from);
         }
       }
     } catch (error) {

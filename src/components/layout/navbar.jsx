@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Warehouse, Menu, X } from "lucide-react";
-import { motion } from "framer-motion";
+import { Warehouse, Menu, X, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const MyNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { isAuthenticated, user } = useAuth();
 
   const location = useLocation();
   const isHome = location.pathname === "/";
@@ -66,12 +67,22 @@ const MyNavbar = () => {
               Galería
             </Link>
 
-            <Link
-              to="/auth"
-              className={`text-sm transition-colors hover:text-blue-600 ${textColor}`}
-            >
-              Iniciar sesión
-            </Link>
+            {isAuthenticated() && user ? (
+              <Link
+                to="/profile"
+                className={`flex items-center gap-2 text-sm transition-colors hover:text-blue-600 ${textColor}`}
+              >
+                <User className="w-4 h-4" />
+                Mi Perfil
+              </Link>
+            ) : (
+              <Link
+                to="/auth"
+                className={`text-sm transition-colors hover:text-blue-600 ${textColor}`}
+              >
+                Iniciar sesión
+              </Link>
+            )}
 
             <Link to="/auth">
               <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300">
@@ -98,13 +109,24 @@ const MyNavbar = () => {
               >
                 Galería
               </Link>
-              <Link
-                to="/auth"
-                className="text-sm text-gray-700 transition-colors hover:text-blue-600"
-                onClick={() => setIsOpen(false)}
-              >
-                Iniciar sesión
-              </Link>
+              {isAuthenticated() && user ? (
+                <Link
+                  to="/profile"
+                  className="flex items-center justify-center gap-2 text-sm text-gray-700 transition-colors hover:text-blue-600"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <User className="w-4 h-4" />
+                  Mi Perfil
+                </Link>
+              ) : (
+                <Link
+                  to="/auth"
+                  className="text-sm text-gray-700 transition-colors hover:text-blue-600"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Iniciar sesión
+                </Link>
+              )}
               <Link to="/auth" onClick={() => setIsOpen(false)}>
                 <button className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300">
                   Reservar Ahora
