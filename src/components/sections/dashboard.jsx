@@ -1,9 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Users, Building, Boxes } from "lucide-react";
 import useCRUD from "../../hooks/useCRUD";
 
 const Dashboard = () => {
-  const { data: usuarios, fetchData: fetchUsuarios } = useCRUD(`${import.meta.env.VITE_API_URL}/users`);
+  const token = localStorage.getItem("token");
+
+  const headers = useMemo(() => ({
+    Authorization: `Bearer ${token}`,
+  }), [token]);
+
+  const { data: usuarios, fetchData: fetchUsuarios } = useCRUD(`${import.meta.env.VITE_API_URL}/users`, headers);
   const { data: sedes, fetchData: fetchSedes } = useCRUD(`${import.meta.env.VITE_API_URL}/sites`);
   const { data: almacenes, fetchData: fetchAlmacenes } = useCRUD(`${import.meta.env.VITE_API_URL}/warehouses`);
 
