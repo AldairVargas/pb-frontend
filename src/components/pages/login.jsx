@@ -3,22 +3,52 @@ import { Warehouse, Eye, EyeClosed } from "lucide-react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import "../../index.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import useCRUD from "../../hooks/useCRUD";
+import { toast } from "react-toastify";
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Email inválido").required("Email es requerido"),
   password: Yup.string()
-    .min(8, "La contraseña debe tener al menos 8 caracteres")
+    .min(6, "La contraseña debe tener al menos 6 caracteres")
     .required("Contraseña es requerida"),
   remember: Yup.boolean(),
 });
 
 const MyLogin = ({ onSwitchForm }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const { saveData } = useCRUD();
+  const navigate = useNavigate();
 
-  const handleSubmit = (values, { setSubmitting }) => {
-    console.log(values);
-    setSubmitting(false);
+  const handleSubmit = async (values, { setSubmitting }) => {
+    try {
+      const response = await saveData(
+        `${import.meta.env.VITE_API_URL}/auth/login`,
+        'POST',
+        values
+      );
+
+      if (response && response.token) {
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        toast.success('¡Bienvenido!');
+        
+        const roleRoutes = {
+          'User': '/',
+          'Admin': '/admin',
+          'SuperAdmin': '/dashboard'
+        };
+        
+        const route = roleRoutes[response.user.Role.role_name];
+        if (route) {
+          navigate(route);
+        }
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Error al iniciar sesión');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
