@@ -43,9 +43,11 @@ const MyHero = () => {
                   <ArrowRight className="inline-block ml-2" size={16} />
                 </button>
               </Link>
-              <button className="w-full sm:w-auto px-6 py-3 text-sm font-medium bg-white rounded-lg shadow-md hover:bg-gray-100 transition-all duration-300">
-                Ver Catálogo
-              </button>
+              <Link to={"/gallery"}>
+                <button className="w-full sm:w-auto px-6 py-3 text-sm font-medium bg-white rounded-lg shadow-md hover:bg-gray-100 transition-all duration-300">
+                  Ver galería
+                </button>
+              </Link>
             </div>
           </div>
 
@@ -59,4 +61,3 @@ const MyHero = () => {
 };
 
 export default MyHero;
-

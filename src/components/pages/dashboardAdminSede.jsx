@@ -5,15 +5,64 @@ import BodegasList from "../sections/bodegaslist";
 import PagosVencidos from "../sections/pagosvencidos";
 import Reportes from "../sections/reportes";
 import ModalSaveWarehouse from "../ui/modalSaveWarehouse";
+import useCRUD from "../../hooks/useCRUD";
+import { toast } from "react-toastify";
 
 const DashboardAdminSede = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleSaveWarehouse = (formData) => {
-    // Here you would handle the form submission
-    console.log('Warehouse data:', formData);
-    // Add your API call or data handling logic here
-    setIsModalOpen(false);
+  const { saveData, fetchData } = useCRUD(`${import.meta.env.VITE_API_URL}warehouses`);
+
+  const handleSaveWarehouse = async (formData) => {
+    try {
+      const payload = {
+        code: formData.code,
+        dimensions: formData.dimensions,
+        monthly_price: parseFloat(formData.monthly_price),
+        status: formData.status,
+        site_id: parseInt(formData.site_id),
+      };
+
+      // Convertir las fotos a base64
+      const base64Promises = formData.photos.map((file) =>
+        file ? convertToBase64(file) : null
+      );
+
+      const base64Results = await Promise.all(base64Promises);
+
+      base64Results.forEach((base64, i) => {
+        if (base64) {
+          payload[`photo${i + 1}`] = base64.replace(/^data:image\/\w+;base64,/, "");
+        }
+      });
+
+      await saveData(`${import.meta.env.VITE_API_URL}warehouses`, "POST", payload, {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      });
+
+      toast.success("Bodega registrada con éxito");
+      await fetchData();
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error al guardar la bodega:", error);
+      const apiErrors = error?.response?.data?.errors;
+      if (Array.isArray(apiErrors)) {
+        apiErrors.forEach((err) => toast.error(`${err.field}: ${err.message}`));
+      } else {
+        toast.error("Ocurrió un error al guardar la bodega");
+      }
+    }
+  };
+
+  // 🔁 Función auxiliar para convertir archivo a base64
+  const convertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (err) => reject(err);
+    });
   };
 
   return (
@@ -23,6 +72,7 @@ const DashboardAdminSede = () => {
         <section id="dashboard" className="p-6 pb-0">
           <DashboardSede />
         </section>
+
         <section id="bodegas" className="px-6 pt-2 pb-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Bodegas</h2>
@@ -30,14 +80,16 @@ const DashboardAdminSede = () => {
               onClick={() => setIsModalOpen(true)}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
-              Add New Warehouse
+              Registrar nueva bodega
             </button>
           </div>
           <BodegasList />
         </section>
+
         <section id="vencidos" className="px-6 pt-2 pb-6">
           <PagosVencidos />
         </section>
+
         <section id="reportes" className="px-6 pt-2 pb-6">
           <Reportes />
         </section>

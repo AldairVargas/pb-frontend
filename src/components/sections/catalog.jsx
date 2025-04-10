@@ -1,32 +1,46 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import CardWarehouse from "../ui/cardWarehouse.jsx";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import useCRUD from "../../hooks/useCRUD";
 
 const MyCatalog = () => {
-  const [warehouses, setWarehouses] = useState([]);
+  const {
+    data,
+    loading: isLoading,
+    error,
+  } = useCRUD(`${import.meta.env.VITE_API_URL}warehouses`);
 
-  useEffect(() => {
-    const fetchWarehouses = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/warehouses");
-        const formattedData = response.data.map((w) => ({
-          id: w.warehouse_id,
-          size: w.dimensions || "Tamaño no especificado",
-          name: w.code || "Bodega",
-          location: w.Site?.name || "Ubicación no disponible",
-          price: w.monthly_price || 0,
-          features: ["📦 Espaciosa", "🔒 Seguridad", "✅ Accesible"],
-          image: `data:image/jpeg;base64,${w.photo1}`, // usa photo1 como imagen principal
-        }));
-        setWarehouses(formattedData);
-      } catch (error) {
-        console.error("Error al cargar bodegas:", error);
-      }
-    };
+  const warehouses = useMemo(() => {
+    if (!Array.isArray(data)) return [];
 
-    fetchWarehouses();
-  }, []);
+    return data.map((w) => ({
+      id: w.warehouse_id,
+      size: w.dimensions || "Tamaño no especificado",
+      name: w.code || "Bodega",
+      location: w.Site?.name || "Ubicación no disponible",
+      price: w.monthly_price || 0,
+      features: ["📦 Espaciosa", "🔒 Seguridad", "✅ Accesible"],
+      image: w.photo1
+        ? `data:image/jpeg;base64,${w.photo1}`
+        : "/images/default-warehouse.jpg",
+    }));
+  }, [data]);
+
+  if (isLoading) {
+    return (
+      <div className="w-full min-h-screen bg-gray-100 py-12 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full min-h-screen bg-gray-100 py-12 flex items-center justify-center">
+        <p className="text-red-600">Error al cargar las bodegas</p>
+      </div>
+    );
+  }
 
   return (
     <div id="catalog" className="w-full min-h-screen bg-gray-100 py-12">
@@ -39,7 +53,7 @@ const MyCatalog = () => {
         </div>
 
         {/* Cards */}
-        <CardWarehouse data={warehouses.slice(0,3)} />
+        <CardWarehouse data={warehouses.slice(0, 9)} />
 
         <div className="flex justify-center mt-6">
           <Link

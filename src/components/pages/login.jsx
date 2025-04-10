@@ -23,7 +23,7 @@ const MyLogin = ({ onSwitchForm }) => {
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const response = await saveData(
-        `${import.meta.env.VITE_API_URL}/auth/login`,
+        `${import.meta.env.VITE_API_URL}auth/login`,
         'POST',
         values
       );
