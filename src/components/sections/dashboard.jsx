@@ -1,34 +1,43 @@
-import React from "react";
-import { Users, Building, Boxes, FileText } from "lucide-react";
-
-const stats = [
-  {
-    title: "Usuarios",
-    value: 124,
-    icon: <Users className="w-8 h-8 text-blue-600" />,
-    bg: "bg-blue-50",
-  },
-  {
-    title: "Sedes",
-    value: 8,
-    icon: <Building className="w-8 h-8 text-green-600" />,
-    bg: "bg-green-50",
-  },
-  {
-    title: "Almacenes",
-    value: 23,
-    icon: <Boxes className="w-8 h-8 text-cyan-600" />,
-    bg: "bg-cyan-50",
-  },
-  {
-    title: "Reportes",
-    value: 41,
-    icon: <FileText className="w-8 h-8 text-yellow-600" />,
-    bg: "bg-yellow-50",
-  },
-];
+import React, { useEffect, useState } from "react";
+import { Users, Building, Boxes } from "lucide-react";
+import useCRUD from "../../hooks/useCRUD";
 
 const Dashboard = () => {
+  const { data: usuarios, fetchData: fetchUsuarios } = useCRUD(`${import.meta.env.VITE_API_URL}/users`);
+  const { data: sedes, fetchData: fetchSedes } = useCRUD(`${import.meta.env.VITE_API_URL}/sites`);
+  const { data: almacenes, fetchData: fetchAlmacenes } = useCRUD(`${import.meta.env.VITE_API_URL}/warehouses`);
+
+  const [stats, setStats] = useState([]);
+
+  useEffect(() => {
+    fetchUsuarios();
+    fetchSedes();
+    fetchAlmacenes();
+  }, [fetchUsuarios, fetchSedes, fetchAlmacenes]);
+
+  useEffect(() => {
+    setStats([
+      {
+        title: "Usuarios",
+        value: usuarios?.length || 0,
+        icon: <Users className="w-8 h-8 text-blue-600" />,
+        bg: "bg-blue-50",
+      },
+      {
+        title: "Sedes",
+        value: sedes?.length || 0,
+        icon: <Building className="w-8 h-8 text-green-600" />,
+        bg: "bg-green-50",
+      },
+      {
+        title: "Almacenes",
+        value: almacenes?.length || 0,
+        icon: <Boxes className="w-8 h-8 text-cyan-600" />,
+        bg: "bg-cyan-50",
+      },
+    ]);
+  }, [usuarios, sedes, almacenes]);
+
   return (
     <div className="p-6 bg-gray-50 pt-20 md:pt-0 px-4">
       <h1 className="text-4xl font-extrabold text-blue-600 mb-6">

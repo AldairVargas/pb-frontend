@@ -3,6 +3,15 @@ import { MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const CardWarehouse = ({ data = [] }) => {
+  const handleReservationClick = () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      window.location.href = `/warehouse/details`;
+    } else {
+      window.location.href = '/auth';
+    }
+  };
+
   return (
     <div className="container mx-auto px-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
@@ -45,7 +54,7 @@ const CardWarehouse = ({ data = [] }) => {
                 ))}
               </div>
 
-              <Link to={"/auth"}>
+              <Link to="#" onClick={() => handleReservationClick(warehouse.id)}>
                 <button className="w-full mt-4 px-4 py-2 text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700">
                   Reservar ahora
                 </button>

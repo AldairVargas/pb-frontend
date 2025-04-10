@@ -1,4 +1,3 @@
-import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -21,8 +20,8 @@ const mockWarehouse = {
   ],
 };
 
+//to do: hacer que esto sea dinámico dependiendo de la card que se seleccione.
 export default function WarehouseDetail() {
-  const { id } = useParams();
   const warehouse = mockWarehouse; // ← luego esto será una petición
   const [selectedImage, setSelectedImage] = useState(warehouse.photos[0]);
 
