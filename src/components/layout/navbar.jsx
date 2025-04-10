@@ -1,87 +1,78 @@
 import { useState, useEffect } from "react";
 import { Warehouse, Menu, X } from "lucide-react";
 import { motion } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const MyNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const location = useLocation();
-  const isHome = location.pathname === "/";
-  const isGallery = location.pathname === "/gallery";
-  const isDetails = location.pathname.startsWith("/warehouse/");
-
   useEffect(() => {
-    if (isHome) {
-      const handleScroll = () => setIsScrolled(window.scrollY > 50);
-      window.addEventListener("scroll", handleScroll);
-      return () => window.removeEventListener("scroll", handleScroll);
-    }
-  }, [isHome]);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50); // Detecta si el usuario ha bajado más de 50px
+    };
 
-  const baseColor =
-    isHome && isScrolled
-      ? "bg-white/70 shadow-md backdrop-blur-lg"
-      : isGallery || isDetails
-      ? "bg-white shadow-md text-gray-900"
-      : "bg-transparent text-white";
-
-  const textColor =
-    isGallery || isDetails || isScrolled ? "text-gray-900" : "text-white";
-
-  // 💡 Solo aplicar position: fixed si estamos en la landing
-  const positionStyle = isHome ? "fixed" : "relative";
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <div className="flex flex-col">
       <header
-        className={`${positionStyle} top-0 left-0 w-full z-50 transition-all duration-300 ${baseColor}`}
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+          isScrolled
+            ? "bg-white/70 shadow-md backdrop-blur-lg" // Navbar con scroll
+            : "bg-transparent backdrop-blur-lg" // Navbar inicial
+        }`}
       >
         <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
-          <Link to="/">
-            <div className={`flex gap-2 items-center text-2xl ${textColor}`}>
-              <Warehouse />
-              <span>BodegaSegura</span>
-            </div>
-          </Link>
+          <div className="flex gap-2 items-center text-2xl text-gray-900">
+            <Warehouse />
+            <span>BodegaSegura</span>
+          </div>
 
-          {/* Botón Menú Hamburguesa */}
+          {/* Botón Menú Hamburguesa (Móvil) */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className={`md:hidden transition-colors duration-300 focus:outline-none ${
-              textColor
-            }`}
+            className="md:hidden text-gray-700 focus:outline-none"
           >
             {isOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
           </button>
 
           {/* Menú Desktop */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link
-              to="/gallery"
-              className={`text-sm transition-colors hover:text-blue-600 ${textColor}`}
+            <a
+              href="#servicios"
+              className="text-sm text-gray-700 transition-colors hover:text-blue-600"
             >
-              Galería
-            </Link>
-
-            <Link
-              to="/auth"
-              className={`text-sm transition-colors hover:text-blue-600 ${textColor}`}
+              Servicios
+            </a>
+            <a
+              href="#catalog"
+              className="text-sm text-gray-700 transition-colors hover:text-blue-600"
             >
-              Iniciar sesión
+              Catálogo
+            </a>
+            <a
+              href="#contacto"
+              className="text-sm text-gray-700 transition-colors hover:text-blue-600"
+            >
+              Contacto
+            </a>
+            <Link
+              to={"/login"}
+              className="text-sm text-gray-700 transition-colors hover:text-blue-600"
+            >
+              Iniciar sesion
             </Link>
-
-            <Link to="/auth">
-              <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300">
-                Reservar Ahora
-              </button>
-            </Link>
+            <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300">
+              Reservar Ahora
+            </button>
           </nav>
         </div>
 
-        {/* Menú móvil */}
+        {/* Menú Móvil (Animación con Framer Motion) */}
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -91,25 +82,40 @@ const MyNavbar = () => {
             className="md:hidden bg-white/90 backdrop-blur-lg shadow-md p-4"
           >
             <nav className="flex flex-col space-y-4 text-center">
-              <Link
-                to="/gallery"
+              <a
+                href="#servicios"
                 className="text-sm text-gray-700 transition-colors hover:text-blue-600"
                 onClick={() => setIsOpen(false)}
               >
-                Galería
-              </Link>
-              <Link
-                to="/auth"
+                Servicios
+              </a>
+              <a
+                href="#catalog"
                 className="text-sm text-gray-700 transition-colors hover:text-blue-600"
                 onClick={() => setIsOpen(false)}
               >
-                Iniciar sesión
+                Catálogo
+              </a>
+              <a
+                href="#contacto"
+                className="text-sm text-gray-700 transition-colors hover:text-blue-600"
+                onClick={() => setIsOpen(false)}
+              >
+                Contacto
+              </a>
+              <Link
+                to="/login"
+                className="text-sm text-gray-700 transition-colors hover:text-blue-600"
+                onClick={() => setIsOpen(false)}
+              >
+                Inciar sesión
               </Link>
-              <Link to="/auth" onClick={() => setIsOpen(false)}>
-                <button className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300">
-                  Reservar Ahora
-                </button>
-              </Link>
+              <button
+                className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300"
+                onClick={() => setIsOpen(false)}
+              >
+                Reservar Ahora
+              </button>
             </nav>
           </motion.div>
         )}

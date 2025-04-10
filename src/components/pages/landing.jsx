@@ -8,10 +8,10 @@ import Contact from "../../components/sections/contact.jsx";
 import MyOffert from "../../components/sections/offert.jsx"; 
 import Footer from "../layout/footer.jsx";
 
-
 export default function Landing() {
   return (
     <div>
+      <Navbar />
       <Hero />
       <Services />
       <Catalog />

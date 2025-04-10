@@ -36,7 +36,7 @@ const cardData = [
               {card.icon}
               <h2 className="text-2xl font-bold my-4">{card.title}</h2>
               <p className="text-gray-400">{card.description}</p>
-              <a href="#contacto">
+              <a href="#">
                 <div className="flex flex-row items-center mt-4 text-blue-600">
                     <p className="text-sm">Saber más</p>
                     <ArrowRight className="w-3 h-3 ml-4 mt-0" />

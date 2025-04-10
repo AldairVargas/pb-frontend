@@ -7,7 +7,6 @@ import {
   LogOut,
   Menu
 } from "lucide-react";
-import { motion } from "framer-motion"; // 👈 Importación añadida
 
 const SidebarAdminSede = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,18 +56,14 @@ const SidebarAdminSede = () => {
         <NavLinks />
       </div>
 
-      {/* MENÚ móvil desplegable con animación */}
+      {/* MENÚ móvil desplegable */}
       {isOpen && (
-        <motion.div
+        <div
           id="mobile-menu"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="fixed top-16 left-0 right-0 bottom-0 bg-white border-t shadow z-40 overflow-y-auto md:hidden"
+          className="fixed top-16 left-0 right-0 bottom-0 bg-white border-t shadow z-40 overflow-y-auto"
         >
           <NavLinks onClick={() => setIsOpen(false)} />
-        </motion.div>
+        </div>
       )}
 
       {/* Espaciado para el contenido en móvil */}

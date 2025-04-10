@@ -1,36 +1,6 @@
 import React from "react";
 import { Phone, MapPin } from "lucide-react";
 
-const escapeHTML = (str) => {
-  return str.replace(/[&<>"']/g, (match) => {
-    const escapeChars = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#039;',
-    };
-    return escapeChars[match];
-  });
-};
-
-const handleSecureSubmit = (e) => {
-  e.preventDefault();
-  const form = e.target;
-  const formData = new FormData(form);
-
-  for (let [key, value] of formData.entries()) {
-    if (/<script.*?>|<\/script>/gi.test(value)) {
-      alert("Entrada inválida detectada.");
-      return;
-    }
-    formData.set(key, escapeHTML(value));
-  }
-
-  console.log("Datos escapados y seguros:", Object.fromEntries(formData));
-  // Aquí podrías enviar al backend
-};
-
 const MyContact = () => {
   return (
     <div id="contacto" className="w-full min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-12">
@@ -40,7 +10,8 @@ const MyContact = () => {
           <div className="flex flex-col justify-start text-center md:text-left">
             <h1 className="text-3xl md:text-4xl font-bold">¿Necesitas más información?</h1>
             <p className="text-gray-400 text-lg mt-3">
-              Completa el formulario y uno de nuestros asesores se pondrá en contacto contigo para resolver todas tus dudas.
+              Completa el formulario y uno de nuestros asesores se pondrá en
+              contacto contigo para resolver todas tus dudas.
             </p>
 
             {/* Teléfono */}
@@ -73,17 +44,13 @@ const MyContact = () => {
               Completa el formulario y te responderemos a la brevedad.
             </p>
 
-            <form className="space-y-4" onSubmit={handleSecureSubmit}>
+            <form className="space-y-4">
               {/* Nombre y Apellido */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-semibold">Nombre</label>
                   <input
                     type="text"
-                    name="nombre"
-                    required
-                    maxLength={50}
-                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
                     placeholder="Tu nombre"
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                   />
@@ -92,10 +59,6 @@ const MyContact = () => {
                   <label className="text-sm font-semibold">Apellido</label>
                   <input
                     type="text"
-                    name="apellido"
-                    required
-                    maxLength={50}
-                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
                     placeholder="Tu apellido"
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                   />
@@ -107,9 +70,6 @@ const MyContact = () => {
                 <label className="text-sm font-semibold">Email</label>
                 <input
                   type="email"
-                  name="email"
-                  required
-                  maxLength={100}
                   placeholder="tu@email.com"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                 />
@@ -120,10 +80,6 @@ const MyContact = () => {
                 <label className="text-sm font-semibold">Teléfono</label>
                 <input
                   type="tel"
-                  name="telefono"
-                  required
-                  maxLength={20}
-                  pattern="^[0-9\s+\-]{7,20}$"
                   placeholder="Tu teléfono"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                 />
@@ -133,10 +89,7 @@ const MyContact = () => {
               <div>
                 <label className="text-sm font-semibold">Mensaje</label>
                 <textarea
-                  name="mensaje"
                   rows="4"
-                  required
-                  maxLength={500}
                   placeholder="¿En qué podemos ayudarte?"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                 />
