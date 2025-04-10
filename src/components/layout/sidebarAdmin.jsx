@@ -10,7 +10,7 @@ import {
   Menu,
   Warehouse
 } from "lucide-react";
-import { motion } from "framer-motion"; // 👈 Agregado
+import { useAuth } from "../../context/AuthContext";
 
 const SidebarAdmin = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -75,7 +75,15 @@ const SidebarAdmin = () => {
   );
 };
 
-const NavLinks = ({ onClick }) => (
+const NavLinks = ({ onClick }) => {
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    window.location.href = '/';
+  };
+
+  return (
   <nav className="flex flex-col md:space-y-4 p-4 space-y-2">
     <a href="#dashboard" onClick={onClick} className="flex items-center px-4 py-2 rounded-lg hover:bg-blue-50 transition">
       <Home className="w-5 h-5 mr-2 text-blue-600" />
@@ -97,11 +105,18 @@ const NavLinks = ({ onClick }) => (
       <List className="w-5 h-5 mr-2 text-blue-600" />
       <span className="text-sm font-medium text-gray-700">Reportes</span>
     </a>
-    <button onClick={onClick} className="flex items-center mt-6 px-4 py-2 text-sm font-medium text-red-500 hover:text-red-700 transition">
+    <button 
+      onClick={() => {
+        if (onClick) onClick();
+        handleLogout();
+      }} 
+      className="flex items-center mt-6 px-4 py-2 text-sm font-medium text-red-500 hover:text-red-700 transition"
+    >
       <LogOut className="w-5 h-5 mr-2" />
       Cerrar sesión
     </button>
   </nav>
-);
+  );
+};
 
 export default SidebarAdmin;
