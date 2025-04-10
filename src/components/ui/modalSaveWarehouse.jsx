@@ -90,7 +90,8 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
                 value={formData.dimensions}
                 onChange={handleInputChange}
                 className="w-full rounded-lg border border-gray-300 px-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                maxLength={250}
+                maxLength={50}
+                min={5}
                 required
               />
             </div>
