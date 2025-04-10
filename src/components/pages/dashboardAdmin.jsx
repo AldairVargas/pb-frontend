@@ -22,9 +22,6 @@ const DashboardAdmin = () => {
   <section id="almacenes" className="p-6 pb-0">
     < AlmacenesAdmin />
   </section>
-  <section id="almacenes" className="p-6 pb-0">
-    < ReportesAdmin />
-  </section>
 </main>
 
     </div>
