@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from "react";
-import { useDropzone } from "react-dropzone";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
@@ -22,6 +21,9 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
   };
 
   const onDrop = useCallback((acceptedFiles, photoIndex) => {
+    const file = acceptedFiles?.[0];
+    if (!file || !(file instanceof Blob)) return;
+
     const reader = new FileReader();
     reader.onload = () => {
       setPreviews((prev) => {
@@ -31,11 +33,11 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
       });
       setFormData((prev) => {
         const newPhotos = [...prev.photos];
-        newPhotos[photoIndex] = acceptedFiles[0];
+        newPhotos[photoIndex] = file;
         return { ...prev, photos: newPhotos };
       });
     };
-    reader.readAsDataURL(acceptedFiles[0]);
+    reader.readAsDataURL(file);
   }, []);
 
   const handleInputChange = (e) => {
@@ -65,82 +67,57 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
 
         <form className="px-8 py-6 space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Código
-              </label>
-              <input
-                type="text"
-                name="code"
-                value={formData.code}
-                onChange={handleInputChange}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                maxLength={15}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Dimensiones
-              </label>
-              <input
-                type="text"
-                name="dimensions"
-                value={formData.dimensions}
-                onChange={handleInputChange}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                maxLength={250}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Precio mensual
-              </label>
-              <input
-                type="number"
-                name="monthly_price"
-                value={formData.monthly_price}
-                onChange={handleInputChange}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                step="0.01"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Estado
-              </label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="available">Disponible</option>
-                <option value="occupied">Ocupada</option>
-                <option value="expired">Expirada</option>
-                <option value="evicted">Desalojada</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                ID del sitio
-              </label>
-              <input
-                type="number"
-                name="site_id"
-                value={formData.site_id}
-                onChange={handleInputChange}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
+            <input
+              type="text"
+              name="code"
+              placeholder="Ej. WH-001"
+              value={formData.code}
+              onChange={handleInputChange}
+              className="w-full h-12 rounded-lg border border-gray-300 px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              maxLength={15}
+              required
+            />
+            <input
+              type="text"
+              name="dimensions"
+              placeholder="Ej. 5x4x3 metros"
+              value={formData.dimensions}
+              onChange={handleInputChange}
+              className="w-full h-12 rounded-lg border border-gray-300 px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              maxLength={50}
+              required
+            />
+            <input
+              type="number"
+              name="monthly_price"
+              placeholder="Ej. 2500.00"
+              value={formData.monthly_price}
+              onChange={handleInputChange}
+              className="w-full h-12 rounded-lg border border-gray-300 px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              step="0.01"
+              required
+            />
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              className="w-full h-12 appearance-none rounded-lg border border-gray-300 px-4 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="available">Disponible</option>
+              <option value="occupied">Ocupada</option>
+              <option value="expired">Expirada</option>
+              <option value="evicted">Desalojada</option>
+            </select>
+            <input
+              type="number"
+              name="site_id"
+              placeholder="Ej. 1"
+              value={formData.site_id}
+              onChange={handleInputChange}
+              className="w-full h-12 rounded-lg border border-gray-300 px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
           </div>
 
           <div>
@@ -176,8 +153,7 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => onDrop([e.target.files[0]], index)}
-                    required
+                    onChange={(e) => onDrop([e.target.files?.[0]], index)}
                   />
                 </div>
               ))}
@@ -198,7 +174,6 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
               onClick={(e) => {
                 e.preventDefault();
                 onSave(formData);
-                handleClose();
               }}
             >
               Guardar bodega

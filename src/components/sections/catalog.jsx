@@ -39,7 +39,7 @@ const MyCatalog = () => {
         </div>
 
         {/* Cards */}
-        <CardWarehouse data={warehouses.slice(0,6)} />
+        <CardWarehouse data={warehouses} />
 
         <div className="flex justify-center mt-6">
           <Link
