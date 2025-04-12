@@ -27,7 +27,7 @@ const MyLogin = ({ onSwitchForm }) => {
     try {
       const response = await saveData(
         `${import.meta.env.VITE_API_URL}/auth/login`,
-        'POST',
+        "POST",
         values
       );
 
@@ -39,23 +39,23 @@ const MyLogin = ({ onSwitchForm }) => {
           name: response.user.first_name,
           lastname: response.user.last_name,
           phone: response.user.phone,
-          role: response.user.Role
+          role: response.user.Role,
         };
         login(response.token, userRole, userData);
-        toast.success('¡Bienvenido!');
-        
+        toast.success("¡Bienvenido!");
+
         // Redirigir basado en el rol y la ubicación anterior
-        const from = location.state?.from?.pathname || '/';
-        if (userRole === 'Admin') {
-          navigate('/dashboard');
-        } else if (userRole === 'SuperAdmin') {
-          navigate('/admin');
+        const from = location.state?.from?.pathname || "/";
+        if (userRole === "Admin") {
+          navigate("/dashboard");
+        } else if (userRole === "SuperAdmin") {
+          navigate("/admin");
         } else {
           navigate(from);
         }
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al iniciar sesión');
+      toast.error(error.response?.data?.message || "Error al iniciar sesión");
     } finally {
       setSubmitting(false);
     }
@@ -123,23 +123,25 @@ const MyLogin = ({ onSwitchForm }) => {
                           type="email"
                           name="email"
                           id="floating_email"
-                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-black peer ${
+                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black peer ${
                             errors.email && touched.email
-                              ? "border-red-500"
-                              : ""
+                              ? "border-red-500 pr-10"
+                              : "border-gray-300"
                           }`}
                           placeholder=" "
                         />
                         <label
                           htmlFor="floating_email"
-                          className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                          className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-7 scale-75 top-3 -z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-7"
                         >
                           Correo Electrónico
                         </label>
+
                         {errors.email && touched.email && (
-                          <p className="mt-1 text-xs text-red-500">
+                          <div className="absolute top-full left-0 mt-1 w-max max-w-xs bg-red-500 text-white text-xs px-3 py-1 rounded-md shadow-lg whitespace-normal z-10">
                             {errors.email}
-                          </p>
+                            <div className="absolute -top-1 left-2 w-3 h-3 bg-red-500 transform rotate-45 z-[-1]"></div>
+                          </div>
                         )}
                       </div>
 
@@ -149,47 +151,39 @@ const MyLogin = ({ onSwitchForm }) => {
                           type={showPassword ? "text" : "password"}
                           name="password"
                           id="floating_password"
-                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-black peer ${
+                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black peer ${
                             errors.password && touched.password
                               ? "border-red-500 pr-20"
-                              : "pr-10"
+                              : "pr-10 border-gray-300"
                           }`}
                           placeholder=" "
                         />
                         <label
                           htmlFor="floating_password"
-                          className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                          className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-7 scale-75 top-3 -z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-7"
                         >
                           Contraseña
                         </label>
-                        <button
-                          type="button"
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? <EyeClosed /> : <Eye />}
-                        </button>
-                        {errors.password && touched.password && (
-                          <p className="mt-1 text-xs text-red-500">
-                            {errors.password}
-                          </p>
-                        )}
+
+                        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+                          <button
+                            type="button"
+                            className="text-gray-500 focus:outline-none relative group"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? <EyeClosed /> : <Eye />}
+                            {errors.password && touched.password && (
+                              <div className="absolute -top-12 right-0 w-max max-w-[200px] bg-red-500 text-white text-xs px-3 py-1 rounded-md shadow-lg whitespace-normal group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                {errors.password}
+                                <div className="absolute bottom-[-6px] right-2 w-3 h-3 bg-red-500 transform rotate-45"></div>
+                              </div>
+                            )}
+                          </button>
+                        </div>
                       </div>
 
                       {/* Remember me & Forgot Password */}
                       <div className="flex flex-row items-center mb-3">
-                        {/* <Field
-                          type="checkbox"
-                          name="remember"
-                          id="remember"
-                          className="w-4 h-4 text-gray-500 bg-gray-100 rounded border-gray-300 focus:ring-gray-500"
-                        />
-                        <label
-                          htmlFor="remember"
-                          className="ml-2 text-sm font-medium text-black"
-                        >
-                          Remember me
-                        </label> */}
                         <Link
                           to="/"
                           className="ml-auto text-sm text-black hover:text-gray-500"
