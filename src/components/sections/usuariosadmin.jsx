@@ -28,20 +28,24 @@ const validationSchema = Yup.object({
   phone: Yup.string()
     .required("Requerido")
     .matches(/^\d{10}$/, "Debe tener 10 dígitos"),
-  role_id: Yup.number()
-    .required("Requerido")
-    .min(1)
-    .max(3),
+  role_id: Yup.number().required("Requerido").min(1).max(3),
 });
 
 const UsuariosAdmin = () => {
   const token = localStorage.getItem("token");
 
-  const headers = useMemo(() => ({
-    Authorization: `Bearer ${token}`,
-  }), [token]);
+  const headers = useMemo(
+    () => ({
+      Authorization: `Bearer ${token}`,
+    }),
+    [token]
+  );
 
-  const { data: usuarios, fetchData, saveData } = useCRUD(`${import.meta.env.VITE_API_URL}/users`, headers);
+  const {
+    data: usuarios,
+    fetchData,
+    saveData,
+  } = useCRUD(`${import.meta.env.VITE_API_URL}/users`, headers);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -50,12 +54,9 @@ const UsuariosAdmin = () => {
 
   const handleCreateUser = async (values, { resetForm, setSubmitting }) => {
     try {
-      await saveData(
-        `${import.meta.env.VITE_API_URL}/users`,
-        "POST",
-        values,
-        { Authorization: `Bearer ${token}` }
-      );
+      await saveData(`${import.meta.env.VITE_API_URL}/users`, "POST", values, {
+        Authorization: `Bearer ${token}`,
+      });
       toast.success("Usuario creado correctamente");
       fetchData();
       setIsOpen(false);
@@ -67,7 +68,6 @@ const UsuariosAdmin = () => {
       setSubmitting(false);
     }
   };
-  
 
   return (
     <div className="p-6 pt-20 md:pt-8">
@@ -94,8 +94,13 @@ const UsuariosAdmin = () => {
           </thead>
           <tbody className="text-gray-800 text-base">
             {usuarios?.map((user) => (
-              <tr key={user.user_id} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                <td className="px-6 py-4">{user.first_name} {user.last_name}</td>
+              <tr
+                key={user.user_id}
+                className="border-b border-gray-100 hover:bg-gray-50 transition"
+              >
+                <td className="px-6 py-4">
+                  {user.first_name} {user.last_name}
+                </td>
                 <td className="px-6 py-4">{user.email}</td>
                 <td className="px-6 py-4">{user.Role?.role_name}</td>
                 <td className="px-6 py-4">
@@ -104,8 +109,12 @@ const UsuariosAdmin = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-center space-x-3">
-                  <button className="text-blue-600 hover:underline font-medium">Editar</button>
-                  <button className="text-red-600 hover:underline font-medium">Eliminar</button>
+                  <button className="text-blue-600 hover:underline font-medium">
+                    Editar
+                  </button>
+                  <button className="text-red-600 hover:underline font-medium">
+                    Eliminar
+                  </button>
                 </td>
               </tr>
             ))}
@@ -113,13 +122,25 @@ const UsuariosAdmin = () => {
         </table>
       </div>
 
-      <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
+      <Dialog
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        className="relative z-50"
+      >
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+          aria-hidden="true"
+        />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-xl border border-gray-200">
             <div className="flex justify-between items-center mb-4">
-              <Dialog.Title className="text-xl font-semibold text-gray-800">Crear Usuario</Dialog.Title>
-              <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <Dialog.Title className="text-xl font-semibold text-gray-800">
+                Crear Usuario
+              </Dialog.Title>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -136,44 +157,136 @@ const UsuariosAdmin = () => {
               validationSchema={validationSchema}
               onSubmit={handleCreateUser}
             >
-              {({ isSubmitting }) => (
+              {({ isSubmitting, errors, touched }) => (
                 <Form className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                      <Field name="first_name" className="input w-full" />
-                      <ErrorMessage name="first_name" component="div" className="text-red-500 text-sm" />
+                      <label className="block text-sm font-medium text-gray-700">
+                        Nombre
+                      </label>
+                      <Field
+                        name="first_name"
+                        className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none 
+                    ${
+                      errors.first_name && touched.first_name
+                        ? "border-red-500 focus:ring-2 focus:ring-red-300"
+                        : "border-gray-300 focus:ring-2 focus:ring-blue-500"
+                    }`}
+                      />
+                      <ErrorMessage
+                        name="first_name"
+                        component="div"
+                        className="text-red-500 text-sm"
+                      />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Apellido</label>
-                      <Field name="last_name" className="input w-full" />
-                      <ErrorMessage name="last_name" component="div" className="text-red-500 text-sm" />
+                      <label className="block text-sm font-medium text-gray-700">
+                        Apellido
+                      </label>
+                      <Field
+                        name="last_name"
+                        className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none 
+                    ${
+                      errors.last_name && touched.last_name
+                        ? "border-red-500 focus:ring-2 focus:ring-red-300"
+                        : "border-gray-300 focus:ring-2 focus:ring-blue-500"
+                    }`}
+                      />
+                      <ErrorMessage
+                        name="last_name"
+                        component="div"
+                        className="text-red-500 text-sm"
+                      />
                     </div>
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Correo</label>
-                    <Field name="email" type="email" className="input w-full" />
-                    <ErrorMessage name="email" component="div" className="text-red-500 text-sm" />
+                    <label className="block text-sm font-medium text-gray-700">
+                      Correo
+                    </label>
+                    <Field
+                      name="email"
+                      type="email"
+                      className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none 
+                  ${
+                    errors.email && touched.email
+                      ? "border-red-500 focus:ring-2 focus:ring-red-300"
+                      : "border-gray-300 focus:ring-2 focus:ring-blue-500"
+                  }`}
+                    />
+                    <ErrorMessage
+                      name="email"
+                      component="div"
+                      className="text-red-500 text-sm"
+                    />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Teléfono</label>
-                    <Field name="phone" className="input w-full" />
-                    <ErrorMessage name="phone" component="div" className="text-red-500 text-sm" />
+                    <label className="block text-sm font-medium text-gray-700">
+                      Teléfono
+                    </label>
+                    <Field
+                      name="phone"
+                      className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none 
+                  ${
+                    errors.phone && touched.phone
+                      ? "border-red-500 focus:ring-2 focus:ring-red-300"
+                      : "border-gray-300 focus:ring-2 focus:ring-blue-500"
+                  }`}
+                    />
+                    <ErrorMessage
+                      name="phone"
+                      component="div"
+                      className="text-red-500 text-sm"
+                    />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Contraseña</label>
-                    <Field name="password" type="password" className="input w-full" />
-                    <ErrorMessage name="password" component="div" className="text-red-500 text-sm" />
+                    <label className="block text-sm font-medium text-gray-700">
+                      Contraseña
+                    </label>
+                    <Field
+                      name="password"
+                      type="password"
+                      className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none 
+                  ${
+                    errors.password && touched.password
+                      ? "border-red-500 focus:ring-2 focus:ring-red-300"
+                      : "border-gray-300 focus:ring-2 focus:ring-blue-500"
+                  }`}
+                    />
+                    <ErrorMessage
+                      name="password"
+                      component="div"
+                      className="text-red-500 text-sm"
+                    />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Rol</label>
-                    <Field as="select" name="role_id" className="input w-full">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Rol
+                    </label>
+                    <Field
+                      as="select"
+                      name="role_id"
+                      className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none 
+                  ${
+                    errors.role_id && touched.role_id
+                      ? "border-red-500 focus:ring-2 focus:ring-red-300"
+                      : "border-gray-300 focus:ring-2 focus:ring-blue-500"
+                  }`}
+                    >
                       <option value="1">Admin</option>
                       <option value="2">User</option>
                       <option value="3">SuperAdmin</option>
                     </Field>
-                    <ErrorMessage name="role_id" component="div" className="text-red-500 text-sm" />
+                    <ErrorMessage
+                      name="role_id"
+                      component="div"
+                      className="text-red-500 text-sm"
+                    />
                   </div>
+
                   <div className="flex justify-end mt-6">
                     <button
                       type="submit"
