@@ -10,8 +10,9 @@ import { toast } from "react-toastify";
 
 const DashboardAdminSede = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [reloadBodegas, setReloadBodegas] = useState(false);
 
-  const { saveData, fetchData } = useCRUD(`${import.meta.env.VITE_API_URL}/warehouses`);
+  const { saveData } = useCRUD(`${import.meta.env.VITE_API_URL}/warehouses`);
 
   const handleSaveWarehouse = async (formData) => {
     try {
@@ -23,7 +24,6 @@ const DashboardAdminSede = () => {
         site_id: parseInt(formData.site_id),
       };
 
-      // Convertir las fotos a base64
       const base64Promises = formData.photos.map((file) =>
         file ? convertToBase64(file) : null
       );
@@ -42,7 +42,7 @@ const DashboardAdminSede = () => {
       });
 
       toast.success("Bodega registrada con éxito");
-      await fetchData();
+      setReloadBodegas(prev => !prev); // 🔁 fuerza recarga en BodegasList
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error al guardar la bodega:", error);
@@ -55,7 +55,6 @@ const DashboardAdminSede = () => {
     }
   };
 
-  // 🔁 Función auxiliar para convertir archivo a base64
   const convertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -73,9 +72,9 @@ const DashboardAdminSede = () => {
           <DashboardSede />
         </section>
 
-        <section id="bodegas" className="px-6 pt-2 pb-6">
+        <section id="bodegas" className="px-6 pt-2 pb-3">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">Bodegas</h2>
+            <h1 className="text-4xl font-bold text-blue-600 mb-6 px-6">Bodegas</h1>
             <button
               onClick={() => setIsModalOpen(true)}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -83,7 +82,7 @@ const DashboardAdminSede = () => {
               Registrar nueva bodega
             </button>
           </div>
-          <BodegasList />
+          <BodegasList reload={reloadBodegas} />
         </section>
 
         <section id="vencidos" className="px-6 pt-2 pb-6">
@@ -100,11 +99,6 @@ const DashboardAdminSede = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveWarehouse}
       />
-      <ModalSaveSite
-  isOpen={isModalOpen}
-  onClose={() => setIsModalOpen(false)}
-  onSave={handleSaveSite}
-/>
     </div>
   );
 };

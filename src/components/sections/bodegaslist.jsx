@@ -1,97 +1,132 @@
-import React from "react";
-import { Pencil, Trash2, RotateCcw } from "lucide-react";
+import React, { useEffect } from "react";
+import DataTable from "react-data-table-component";
+import useCRUD from "../../hooks/useCRUD";
+import { style, title } from "framer-motion/client";
 
-const bodegas = [
-  {
-    id: 1,
-    nombre: "Bodega A",
-    estado: "libre",
-    precio: "$1,200 MXN",
-    tamaño: "3x4 m",
-    imagen: "https://placehold.co/300x200",
-  },
-  {
-    id: 2,
-    nombre: "Bodega B",
-    estado: "ocupada",
-    precio: "$1,800 MXN",
-    tamaño: "4x5 m",
-    imagen: "https://placehold.co/300x200",
-  },
-  {
-    id: 3,
-    nombre: "Bodega C",
-    estado: "vencida",
-    precio: "$1,500 MXN",
-    tamaño: "3x3 m",
-    imagen: "https://placehold.co/300x200",
-  },
-];
+const BodegasList = ({ reload }) => {
+  const { data: almacenes, fetchData, saveData } = useCRUD(`${import.meta.env.VITE_API_URL}/warehouses`);
 
-const getEstadoColor = (estado) => {
-  switch (estado) {
-    case "libre":
-      return "text-green-600 bg-green-50";
-    case "ocupada":
-      return "text-blue-600 bg-blue-50";
-    case "vencida":
-      return "text-red-600 bg-red-50";
-    default:
-      return "text-gray-500 bg-gray-100";
-  }
-};
+  useEffect(() => {
+    fetchData();
+  }, [fetchData, reload]);
 
-const BodegasList = () => {
-  return (
-    <div className="p-6">
-      <h1 className="text-4xl font-extrabold text-blue-600 mb-6">Bodegas</h1>
+  const handleStatusChange = async (almacen) => {
+    const newStatus = almacen.status === "occupied" ? "available" : "occupied";
+    try {
+      await saveData(
+        `${import.meta.env.VITE_API_URL}/warehouses/${almacen.warehouse_id}/status`,
+        "put",
+        { status: newStatus }
+      );
+      fetchData();
+    } catch (err) {
+      console.error("Error actualizando estado:", err);
+    }
+  };
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {bodegas.map((bodega) => (
-          <div
-            key={bodega.id}
-            className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all"
+  const getEstadoBadge = (status) => {
+    if (status === "occupied") {
+      return <span className="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-700">Ocupado</span>;
+    }
+    if (status === "available") {
+      return <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">Disponible</span>;
+    }
+    return <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">Desconocido</span>;
+  };
+
+  const columns = [
+    {
+      name: "Código",
+      selector: (row) => row.code,
+      sortable: true,
+      cell: (row) => <div className="w-full text-center">{row.code}</div>,
+    },
+    {
+      name: "Ubicación",
+      selector: (row) => row.Site?.name || "N/A",
+      sortable: true,
+      cell: (row) => <div className="w-full text-center">{row.Site?.name || "N/A"}</div>,
+    },
+    {
+      name: "Dimensiones",
+      selector: (row) => row.dimensions,
+      sortable: true,
+      cell: (row) => <div className="w-full text-center">{row.dimensions}</div>,
+    },
+    {
+      name: "Precio mensual",
+      selector: (row) => row.monthly_price,
+      sortable: true,
+      cell: (row) => <div className="w-full text-center">${row.monthly_price}</div>,
+    },
+    {
+      name: "Estado",
+      selector: (row) => row.status,
+      sortable: true,
+      cell: (row) => <div className="w-full text-center">{getEstadoBadge(row.status)}</div>,
+    },
+    {
+      name: "Acciones",
+      cell: (row) => (
+        <div className="flex justify-center gap-3 w-full">
+          <button className="text-blue-600 hover:underline font-medium">Editar</button>
+          <button
+            onClick={() => handleStatusChange(row)}
+            className={`font-medium ${
+              row.status === "occupied"
+                ? "text-red-600 hover:underline"
+                : "text-green-600 hover:underline"
+            }`}
           >
-            <img
-              src={bodega.imagen}
-              alt={`Imagen ${bodega.nombre}`}
-              className="w-full h-48 object-cover rounded-t-xl"
-            />
+            {row.status === "occupied" ? "Desactivar" : "Activar"}
+          </button>
+        </div>
+      ),
+    },
+  ];
+  
 
-            <div className="p-4">
-              <h2 className="text-lg font-bold text-gray-800">{bodega.nombre}</h2>
-              <p className="text-gray-500 text-sm mb-2">Tamaño: {bodega.tamaño}</p>
-              <p className="text-gray-500 text-sm mb-4">Precio: {bodega.precio}</p>
+  const customStyles = {
+    headRow: {
+      style: {
+        backgroundColor: "#f9fafb",
+      },
+    },
+    headCells: {
+      style: {
+        justifyContent: "center",
+        fontWeight: "600",
+        fontSize: "14px",
+        color: "#374151",
+      },
+    },
+    cells: {
+      style: {
+        justifyContent: "center",
+      },
+    },
+    rows: {
+      style: {
+        fontSize: "14px",
+        color: "#374151",
+        minHeight: "56px",
+      },
+    },
+  };
 
-              <span
-                className={`text-xs font-medium px-3 py-1 rounded-full ${getEstadoColor(
-                  bodega.estado
-                )}`}
-              >
-                {bodega.estado.toUpperCase()}
-              </span>
+  const sortedData = almacenes?.slice().sort((a, b) => b.warehouse_id - a.warehouse_id);
 
-              <div className="mt-4 flex space-x-2">
-                <button className="flex items-center px-3 py-1 text-sm font-medium text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition">
-                  <Pencil className="w-4 h-4 mr-1" /> Editar
-                </button>
-
-                {bodega.estado === "ocupada" && (
-                  <button className="flex items-center px-3 py-1 text-sm font-medium text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition">
-                    <Trash2 className="w-4 h-4 mr-1" /> Desalojar
-                  </button>
-                )}
-
-                {bodega.estado === "vencida" && (
-                  <button className="flex items-center px-3 py-1 text-sm font-medium text-yellow-600 border border-yellow-600 rounded-lg hover:bg-yellow-600 hover:text-white transition">
-                    <RotateCcw className="w-4 h-4 mr-1" /> Rehabilitar
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+  return (
+    <div className="p-4 bg-white shadow rounded-xl">
+      <DataTable
+        columns={columns}
+        data={sortedData}
+        pagination
+        highlightOnHover
+        striped
+        responsive
+        customStyles={customStyles}
+      />
     </div>
   );
 };

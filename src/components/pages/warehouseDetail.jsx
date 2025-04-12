@@ -1,66 +1,130 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import useCRUD from "../../hooks/useCRUD";
+import ImageGallery from "react-image-gallery";
+import "react-image-gallery/styles/css/image-gallery.css";
 
-const mockWarehouse = {
-  warehouse_id: 1,
-  code: "WH-001",
-  dimensions: "5x4x3 meters",
-  monthly_price: 1500,
-  status: "available",
-  site: {
-    name: "UTEZ",
-    location: "123 Main Street",
-  },
-  photos: [
-    "https://images.unsplash.com/photo-1624927637280-f033784c1279?w=900&auto=format&fit=crop&q=60",
-    "https://images.unsplash.com/photo-1532635042-a6f6ad4745f9?w=900&auto=format&fit=crop&q=60",
-    "https://images.unsplash.com/photo-1565610222536-ef125c59da2e?w=900&auto=format&fit=crop&q=60",
-    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&auto=format&fit=crop&q=60",
-    "https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=900&auto=format&fit=crop&q=60",
-  ],
-};
-
-//to do: hacer que esto sea dinámico dependiendo de la card que se seleccione.
 export default function WarehouseDetail() {
-  const warehouse = mockWarehouse; // ← luego esto será una petición
-  const [selectedImage, setSelectedImage] = useState(warehouse.photos[0]);
+  const { id } = useParams();
+  const { readItem } = useCRUD();
+  const [warehouse, setWarehouse] = useState(null);
+  const [galleryImages, setGalleryImages] = useState([]);
+
+  useEffect(() => {
+    const fetchWarehouse = async () => {
+      try {
+        const data = await readItem(
+          `${import.meta.env.VITE_API_URL}/warehouses/${id}`
+        );
+
+        const photos = [];
+        for (let i = 1; i <= 5; i++) {
+          const key = `photo${i}`;
+          if (data[key]) {
+            const image = `data:image/jpeg;base64,${data[key]}`;
+            photos.push({ original: image, thumbnail: image });
+          }
+        }
+
+        setWarehouse(data);
+        setGalleryImages(photos);
+      } catch (error) {
+        console.error("Error al cargar la bodega:", error);
+      }
+    };
+
+    fetchWarehouse();
+  }, [id, readItem]);
+
+  if (!warehouse) return <div className="p-6">Cargando bodega...</div>;
 
   return (
     <section className="container mx-auto px-6 py-12 mt-12">
       <div className="flex flex-col lg:flex-row gap-12">
-        {/* Galería de imágenes */}
+        {/* Galería */}
         <div className="w-full lg:w-1/2">
-          <div className="border rounded-lg overflow-hidden">
-            <img
-              src={selectedImage}
-              alt="Warehouse principal"
-              className="w-full h-[400px] object-cover"
+          <div className="relative z-0">
+            <ImageGallery
+              items={galleryImages}
+              showPlayButton={false}
+              showFullscreenButton={false}
+              thumbnailPosition="bottom"
+              renderItem={(item) => (
+                <img
+                  src={item.original}
+                  alt=""
+                  className="h-[350px] w-auto max-w-full object-contain mx-auto rounded-lg"
+                />
+              )}
+              renderLeftNav={(onClick, disabled) => (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClick();
+                  }}
+                  disabled={disabled}
+                  className="absolute z-10 top-1/2 left-2 -translate-y-1/2 bg-white text-gray-800 rounded-full p-1 shadow hover:bg-gray-100"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+              )}
+              renderRightNav={(onClick, disabled) => (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClick();
+                  }}
+                  disabled={disabled}
+                  className="absolute z-10 top-1/2 right-2 -translate-y-1/2 bg-white text-gray-800 rounded-full p-1 shadow hover:bg-gray-100"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              )}
             />
-          </div>
-          <div className="flex gap-2 mt-4 overflow-x-auto">
-            {warehouse.photos.map((img, index) => (
-              <img
-                key={index}
-                src={img}
-                alt={`Vista ${index + 1}`}
-                onClick={() => setSelectedImage(img)}
-                className={`w-24 h-24 object-cover cursor-pointer border rounded-lg ${
-                  selectedImage === img ? "ring-2 ring-blue-600" : ""
-                }`}
-              />
-            ))}
           </div>
         </div>
 
-        {/* Información de la bodega */}
+        {/* Información */}
         <div className="w-full lg:w-1/2 space-y-4">
-          <span className="text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full uppercase font-medium tracking-wide w-fit">
+          <span
+            className={`text-sm px-3 py-1 rounded-full uppercase font-medium tracking-wide w-fit ${
+              warehouse.status === "available"
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
             {warehouse.status === "available" ? "Disponible" : "Ocupado"}
           </span>
 
           <h2 className="text-3xl font-bold">Bodega {warehouse.code}</h2>
-          <p className="text-gray-600">Ubicación: {warehouse.site.name}</p>
-          <p className="text-gray-600">Dirección: {warehouse.site.location}</p>
+          <p className="text-gray-600">Ubicación: {warehouse.Site?.name}</p>
+          <p className="text-gray-600">Dirección: {warehouse.Site?.location}</p>
 
           <p className="text-xl font-semibold text-blue-600">
             ${warehouse.monthly_price} / mes
@@ -78,7 +142,8 @@ export default function WarehouseDetail() {
               {warehouse.status === "available" ? "Disponible" : "Ocupado"}
             </p>
           </div>
-          <Link to={'/auth'}>
+
+          <Link to="/auth">
             <button className="cursor-pointer mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition">
               Reservar esta bodega
             </button>
