@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   PieChart,
   Pie,
@@ -7,21 +7,43 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import useCRUD from "../../hooks/useCRUD";
 
-const dataOcupacion = [
-  { name: "Ocupadas", value: 80 },
-  { name: "Libres", value: 30 },
-];
-
-const dataAlertas = [
-  { name: "Pagos Vencidos", value: 10 },
-  { name: "Desalojos", value: 5 },
-];
-
-const COLORS_OCUPACION = ["#3b82f6", "#22c55e"]; // azul y verde
-const COLORS_ALERTAS = ["#facc15", "#ef4444"]; // amarillo y rojo
+const COLORS_OCUPACION = ["#3b82f6", "#22c55e"];
+const COLORS_ALERTAS = ["#facc15", "#ef4444"];
 
 const Reportes = () => {
+  const token = localStorage.getItem("token");
+  const { data: bodegas, fetchData } = useCRUD(`${import.meta.env.VITE_API_URL}/warehouses`, {
+    Authorization: `Bearer ${token}`,
+  });
+
+  const [dataOcupacion, setDataOcupacion] = useState([]);
+  const [dataAlertas, setDataAlertas] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    if (bodegas?.length) {
+      const ocupadas = bodegas.filter((b) => b.status === "occupied").length;
+      const libres = bodegas.filter((b) => b.status === "available").length;
+      const vencidos = bodegas.filter((b) => b.status === "expired").length;
+      const desalojos = bodegas.filter((b) => b.status === "evicted").length;
+
+      setDataOcupacion([
+        { name: "Ocupadas", value: ocupadas },
+        { name: "Libres", value: libres },
+      ]);
+
+      setDataAlertas([
+        { name: "Pagos Vencidos", value: vencidos },
+        { name: "Desalojos", value: desalojos },
+      ]);
+    }
+  }, [bodegas]);
+
   return (
     <div className="mx-auto p-6">
       <h1 className="text-3xl font-bold text-blue-600 mb-6">Reportes</h1>
@@ -42,7 +64,7 @@ const Reportes = () => {
                 dataKey="value"
               >
                 {dataOcupacion.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS_OCUPACION[index % COLORS_OCUPACION.length]} />
+                  <Cell key={`cell-ocupacion-${index}`} fill={COLORS_OCUPACION[index % COLORS_OCUPACION.length]} />
                 ))}
               </Pie>
               <Tooltip />
@@ -66,7 +88,7 @@ const Reportes = () => {
                 dataKey="value"
               >
                 {dataAlertas.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS_ALERTAS[index % COLORS_ALERTAS.length]} />
+                  <Cell key={`cell-alertas-${index}`} fill={COLORS_ALERTAS[index % COLORS_ALERTAS.length]} />
                 ))}
               </Pie>
               <Tooltip />
