@@ -13,9 +13,7 @@ export default function WarehouseDetail() {
   useEffect(() => {
     const fetchWarehouse = async () => {
       try {
-        const data = await readItem(
-          `${import.meta.env.VITE_API_URL}/warehouses/${id}`
-        );
+        const data = await readItem(`${import.meta.env.VITE_API_URL}/warehouses/${id}`);
 
         const photos = [];
         for (let i = 1; i <= 5; i++) {
@@ -33,8 +31,8 @@ export default function WarehouseDetail() {
       }
     };
 
-    fetchWarehouse();
-  }, [id, readItem]);
+    fetchWarehouse(); // Solo se ejecuta cuando cambia el ID
+  }, [id]); // ✅ quitamos readItem del array de dependencias
 
   if (!warehouse) return <div className="p-6">Cargando bodega...</div>;
 
