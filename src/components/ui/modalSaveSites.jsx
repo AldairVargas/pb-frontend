@@ -14,28 +14,21 @@ export default function ModalSaveSite({ isOpen, onClose, onSave, initialData }) 
   const [selectedStateName, setSelectedStateName] = useState("");
   const [municipios, setMunicipios] = useState([]);
 
-  // Cargar municipios si es edición
   useEffect(() => {
     if (initialData) {
-      const estadoEncontrado = Object.entries(estadosData).find(([_, municipios]) =>
-        municipios.includes(initialData.municipality)
-      );
+      const stateIndex = initialData.state - 1;
+      const stateName = Object.keys(estadosData)[stateIndex];
+      const municipiosList = estadosData[stateName];
 
-      const stateName = estadoEncontrado ? estadoEncontrado[0] : "";
       setSelectedStateName(stateName);
-      setMunicipios(estadoEncontrado ? estadosData[stateName] : []);
-
-      const stateId = Object.keys(estadosData).indexOf(stateName) + 1;
-      const municipioId = estadoEncontrado
-        ? estadosData[stateName].indexOf(initialData.municipality) + 1
-        : "";
+      setMunicipios(municipiosList);
 
       setFormData({
         name: initialData.name || "",
         location: initialData.location || "",
         status: parseInt(initialData.status),
-        state: stateId,
-        municipality: municipioId,
+        state: initialData.state,
+        municipality: initialData.municipality,
       });
     } else {
       setFormData({
