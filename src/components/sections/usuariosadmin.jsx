@@ -9,20 +9,21 @@ import { toast } from "react-toastify";
 const validationSchema = Yup.object({
   email: Yup.string().email("Formato inválido").required("Requerido"),
   password: Yup.string()
+    .required("Requerido")
     .min(6, "Mínimo 6 caracteres")
     .matches(
-      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])/,
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
       "Debe tener mayúscula, minúscula, número y carácter especial"
     ),
   first_name: Yup.string()
     .required("Requerido")
-    .min(2)
-    .max(50)
+    .min(2, "Mínimo 2 caracteres")
+    .max(50, "Máximo 50 caracteres")
     .matches(/^[A-Za-zÀ-ÿ\s]+$/, "Solo letras"),
   last_name: Yup.string()
     .required("Requerido")
-    .min(2)
-    .max(50)
+    .min(2, "Mínimo 2 caracteres")
+    .max(50, "Máximo 50 caracteres")
     .matches(/^[A-Za-zÀ-ÿ\s]+$/, "Solo letras"),
   phone: Yup.string()
     .required("Requerido")
@@ -32,145 +33,207 @@ const validationSchema = Yup.object({
 
 const UsuariosAdmin = () => {
   const token = localStorage.getItem("token");
-  const headers = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
 
-  const { data: usuarios, fetchData, saveData, readItem } = useCRUD(`${import.meta.env.VITE_API_URL}/users`, headers);
+  const headers = useMemo(() => ({
+    Authorization: `Bearer ${token}`,
+  }), [token]);
 
+  const { data: usuarios, fetchData, saveData } = useCRUD(`${import.meta.env.VITE_API_URL}/users`, headers);
   const [isOpen, setIsOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const openEditModal = async (userId) => {
-    const user = await readItem(`${import.meta.env.VITE_API_URL}/users/${userId}`, headers);
-    setEditingUser(user);
-    setIsOpen(true);
-  };
-
-  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+  const handleCreateUser = async (values, { resetForm, setSubmitting }) => {
     try {
-      const method = editingUser ? "PUT" : "POST";
-      const url = editingUser
-        ? `${import.meta.env.VITE_API_URL}/users/${editingUser.user_id}`
-        : `${import.meta.env.VITE_API_URL}/users`;
+      const payload = {
+        ...values,
+        active: true // se crea como activo
+      };
 
-      const payload = { ...values };
-      if (!values.password) delete payload.password; // Evitar actualizar contraseña vacía
-
-      await saveData(url, method, payload, headers);
-      toast.success(editingUser ? "Usuario actualizado" : "Usuario creado");
-      setIsOpen(false);
-      setEditingUser(null);
+      await saveData(`${import.meta.env.VITE_API_URL}/users`, "POST", payload, headers);
+      toast.success("Usuario creado correctamente");
       fetchData();
+      setIsOpen(false);
       resetForm();
     } catch (error) {
-      toast.error("Error al guardar");
+      toast.error("Error al crear el usuario");
+      console.error(error);
     } finally {
       setSubmitting(false);
     }
   };
 
+  const toggleUserStatus = (user) => {
+    const newStatus = !user.active;
+  
+    toast.info(
+      <div>
+        <p>
+          ¿Seguro que deseas <strong>{newStatus ? 'activar' : 'desactivar'}</strong> este usuario?
+        </p>
+        <div className="mt-2 flex justify-end gap-3">
+          <button
+            className="text-sm text-gray-600 hover:underline"
+            onClick={() => toast.dismiss()}
+          >
+            Cancelar
+          </button>
+          <button
+            className={`text-sm font-semibold ${newStatus ? 'text-green-600' : 'text-red-600'} hover:underline`}
+            onClick={async () => {
+              try {
+                await saveData(
+                  `${import.meta.env.VITE_API_URL}/users/${user.user_id}/status`,
+                  "PUT",
+                  { active: newStatus },
+                  {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  }
+                );
+                toast.dismiss();
+                toast.success(`Usuario ${newStatus ? "activado" : "desactivado"} correctamente`);
+                fetchData();
+              } catch (err) {
+                toast.dismiss();
+                toast.error("Error al actualizar el estado del usuario");
+                console.error(err);
+              }
+            }}
+          >
+            Confirmar
+          </button>
+        </div>
+      </div>,
+      {
+        position: "top-center",
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        closeButton: false,
+      }
+    );
+  };
+
   return (
     <div className="p-6 pt-20 md:pt-8">
-      <div className="flex justify-between mb-6">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-blue-600">Usuarios</h1>
         <button
-          onClick={() => {
-            setEditingUser(null);
-            setIsOpen(true);
-          }}
+          onClick={() => setIsOpen(true)}
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
         >
           <Plus className="w-4 h-4" /> Crear Usuario
         </button>
       </div>
 
-      <table className="w-full bg-white shadow rounded-xl border border-gray-200">
-        <thead>
-          <tr className="text-center text-gray-600 border-b">
-            <th className="px-6 py-4">Nombre</th>
-            <th className="px-6 py-4">Correo</th>
-            <th className="px-6 py-4">Rol</th>
-            <th className="px-6 py-4">Estado</th>
-            <th className="px-6 py-4">Acciones</th>
-          </tr>
-        </thead>
-        <tbody className="text-center">
-          {usuarios?.map((user) => (
-            <tr key={user.user_id} className="hover:bg-gray-50">
-              <td className="px-6 py-4">{user.first_name} {user.last_name}</td>
-              <td className="px-6 py-4">{user.email}</td>
-              <td className="px-6 py-4">{user.Role?.role_name}</td>
-              <td className="px-6 py-4">
-                <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${user.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                  {user.active ? "Activo" : "Inactivo"}
-                </span>
-              </td>
-              <td className="px-6 py-4 space-x-3">
-                <button onClick={() => openEditModal(user.user_id)} className="text-blue-600 hover:underline">Editar</button>
-              </td>
+      <div className="overflow-x-auto bg-white shadow-sm rounded-xl border border-gray-200">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="text-gray-600 text-base border-b border-gray-200 text-center">
+              <th className="px-6 py-4 font-semibold">Nombre</th>
+              <th className="px-6 py-4 font-semibold">Correo</th>
+              <th className="px-6 py-4 font-semibold">Rol</th>
+              <th className="px-6 py-4 font-semibold">Estado</th>
+              <th className="px-6 py-4 font-semibold">Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="text-center">
+  {usuarios?.map((user) => (
+    <tr key={user.user_id} className="hover:bg-gray-50">
+      <td className="px-6 py-4">{user.first_name} {user.last_name}</td>
+      <td className="px-6 py-4">{user.email}</td>
+      <td className="px-6 py-4">{user.Role?.role_name}</td>
+      <td className="px-6 py-4">
+        <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${user.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+          {user.active ? "Activo" : "Inactivo"}
+        </span>
+      </td>
+      <td className="px-6 py-4 space-x-3">
+        <button onClick={() => openEditModal(user.user_id)} className="text-blue-600 hover:underline">Editar</button>
+        <button
+          onClick={() => toggleUserStatus(user)}
+          className={`font-medium hover:underline ${user.active ? "text-red-600" : "text-green-600"}`}
+        >
+          {user.active ? "Desactivar" : "Activar"}
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+        </table>
+      </div>
 
-      <Dialog open={isOpen} onClose={() => { setIsOpen(false); setEditingUser(null); }} className="relative z-50">
-        <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
+      {/* Modal de creación */}
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="w-full max-w-lg bg-white rounded-2xl p-8 shadow-xl">
-            <div className="flex justify-between mb-4">
-              <Dialog.Title className="text-xl font-bold text-gray-800">
-                {editingUser ? "Editar Usuario" : "Crear Usuario"}
-              </Dialog.Title>
+          <Dialog.Panel className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-xl border border-gray-200">
+            <div className="flex justify-between items-center mb-4">
+              <Dialog.Title className="text-xl font-semibold text-gray-800">Crear Usuario</Dialog.Title>
               <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
-
             <Formik
               initialValues={{
-                email: editingUser?.email || "",
+                email: "",
                 password: "",
-                first_name: editingUser?.first_name || "",
-                last_name: editingUser?.last_name || "",
-                phone: editingUser?.phone || "",
-                registration_date: editingUser?.registration_date || new Date(),
-                role_id: editingUser?.role_id || 1,
-                active: editingUser?.active ?? true
+                first_name: "",
+                last_name: "",
+                phone: "",
+                registration_date: new Date(),
+                role_id: "1",
               }}
               validationSchema={validationSchema}
-              onSubmit={handleSubmit}
-              enableReinitialize
+              onSubmit={handleCreateUser}
             >
               {({ isSubmitting }) => (
                 <Form className="space-y-4">
-                  <Field name="first_name" placeholder="Nombre" className="input w-full" />
-                  <ErrorMessage name="first_name" component="div" className="text-red-500 text-sm" />
-                  
-                  <Field name="last_name" placeholder="Apellido" className="input w-full" />
-                  <ErrorMessage name="last_name" component="div" className="text-red-500 text-sm" />
-                  
-                  <Field name="email" type="email" placeholder="Correo" className="input w-full" />
-                  <ErrorMessage name="email" component="div" className="text-red-500 text-sm" />
-
-                  <Field name="phone" placeholder="Teléfono" className="input w-full" />
-                  <ErrorMessage name="phone" component="div" className="text-red-500 text-sm" />
-
-                  <Field name="password" type="password" placeholder="Contraseña (solo si cambia)" className="input w-full" />
-                  <ErrorMessage name="password" component="div" className="text-red-500 text-sm" />
-
-                  <Field as="select" name="role_id" className="input w-full">
-                    <option value={1}>Admin</option>
-                    <option value={2}>User</option>
-                    <option value={3}>SuperAdmin</option>
-                  </Field>
-                  <ErrorMessage name="role_id" component="div" className="text-red-500 text-sm" />
-
-                  <div className="flex justify-end">
-                    <button type="submit" disabled={isSubmitting} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-                      {isSubmitting ? "Guardando..." : editingUser ? "Guardar cambios" : "Guardar"}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                      <Field name="first_name" className="input w-full" />
+                      <ErrorMessage name="first_name" component="div" className="text-red-500 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Apellido</label>
+                      <Field name="last_name" className="input w-full" />
+                      <ErrorMessage name="last_name" component="div" className="text-red-500 text-sm" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Correo</label>
+                    <Field name="email" type="email" className="input w-full" />
+                    <ErrorMessage name="email" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Teléfono</label>
+                    <Field name="phone" className="input w-full" />
+                    <ErrorMessage name="phone" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+                    <Field name="password" type="password" className="input w-full" />
+                    <ErrorMessage name="password" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Rol</label>
+                    <Field as="select" name="role_id" className="input w-full">
+                      <option value="1">Admin</option>
+                      <option value="2">User</option>
+                      <option value="3">SuperAdmin</option>
+                    </Field>
+                    <ErrorMessage name="role_id" component="div" className="text-red-500 text-sm" />
+                  </div>
+                  <div className="flex justify-end mt-6">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow disabled:opacity-60"
+                    >
+                      {isSubmitting ? "Guardando..." : "Guardar"}
                     </button>
                   </div>
                 </Form>
