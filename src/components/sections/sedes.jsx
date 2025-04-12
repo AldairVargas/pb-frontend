@@ -108,9 +108,8 @@ const SedesAdmin = () => {
 
   return (
     <div className="p-6 pt-20 md:pt-8">
-      <h1 className="text-3xl font-bold text-blue-600 mb-6 text-center">Sedes</h1>
-
-      <div className="flex justify-end mb-4">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-blue-600 text-center">Sedes</h1>
         <button
           onClick={() => {
             setEditingSite(null);
@@ -141,17 +140,17 @@ const SedesAdmin = () => {
                   <td className="px-6 py-4 text-center">
                     {`${sede.location}, ${municipioNombre || "Municipio"}, ${estadoNombre || "Estado"}`}
                   </td>
-                  <td className="px-6 py-4 text-center">
-                    {sede.status === 1 ? (
-                      <span className="inline-block px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
-                        Activo
-                      </span>
-                    ) : (
-                      <span className="inline-block px-3 py-1 text-sm font-medium bg-gray-200 text-gray-700 rounded-full">
-                        Inactivo
-                      </span>
-                    )}
-                  </td>
+                  <td className="px-6 py-4">
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      sede.status === 1
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {sede.status === 1 ? "Activo" : "Inactivo"}
+                  </span>
+                </td>
                   <td className="px-6 py-4 flex justify-center gap-4">
                     <button
                       onClick={() => {

@@ -39,13 +39,15 @@ const MyHero = () => {
             <div className="mt-6 flex flex-col items-center w-full gap-4 sm:flex-row sm:justify-center lg:justify-start sm:gap-4">
               <Link to={"/auth"} className="w-full sm:w-auto">
                 <button className="w-full sm:w-auto px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300 flex justify-center items-center">
-                  Reservar Ahora
+                  Reservar ahora
                   <ArrowRight className="inline-block ml-2" size={16} />
                 </button>
               </Link>
-              <button className="w-full sm:w-auto px-6 py-3 text-sm font-medium bg-white rounded-lg shadow-md hover:bg-gray-100 transition-all duration-300">
-                Ver Catálogo
-              </button>
+              <Link to={"/gallery"}>
+                <button className="w-full sm:w-auto px-6 py-3 text-sm font-medium bg-white rounded-lg shadow-md hover:bg-gray-100 transition-all duration-300">
+                  Ver galería
+                </button>
+              </Link>
             </div>
           </div>
 
@@ -59,4 +61,3 @@ const MyHero = () => {
 };
 
 export default MyHero;
-

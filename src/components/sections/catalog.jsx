@@ -1,32 +1,30 @@
 import React, { useEffect, useState } from "react";
 import CardWarehouse from "../ui/cardWarehouse.jsx";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import useCRUD from "../../hooks/useCRUD";
 
 const MyCatalog = () => {
+  const { data: almacenes, fetchData } = useCRUD(`${import.meta.env.VITE_API_URL}/warehouses`);
   const [warehouses, setWarehouses] = useState([]);
 
   useEffect(() => {
-    const fetchWarehouses = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/warehouses");
-        const formattedData = response.data.map((w) => ({
-          id: w.warehouse_id,
-          size: w.dimensions || "Tamaño no especificado",
-          name: w.code || "Bodega",
-          location: w.Site?.name || "Ubicación no disponible",
-          price: w.monthly_price || 0,
-          features: ["📦 Espaciosa", "🔒 Seguridad", "✅ Accesible"],
-          image: `data:image/jpeg;base64,${w.photo1}`, // usa photo1 como imagen principal
-        }));
-        setWarehouses(formattedData);
-      } catch (error) {
-        console.error("Error al cargar bodegas:", error);
-      }
-    };
+    fetchData();
+  }, [fetchData]);
 
-    fetchWarehouses();
-  }, []);
+  useEffect(() => {
+    if (almacenes && Array.isArray(almacenes)) {
+      const formattedData = almacenes.map((w) => ({
+        id: w.warehouse_id,
+        size: w.dimensions || "Tamaño no especificado",
+        name: w.code || "Bodega",
+        location: w.Site?.name || "Ubicación no disponible",
+        price: w.monthly_price || 0,
+        features: ["📦 Espaciosa", "🔒 Seguridad", "✅ Accesible"],
+        image: w.photo1 ? `data:image/jpeg;base64,${w.photo1}` : null,
+      }));
+      setWarehouses(formattedData);
+    }
+  }, [almacenes]);
 
   return (
     <div id="catalog" className="w-full min-h-screen bg-gray-100 py-12">
