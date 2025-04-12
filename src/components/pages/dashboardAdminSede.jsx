@@ -100,6 +100,11 @@ const DashboardAdminSede = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveWarehouse}
       />
+      <ModalSaveSite
+  isOpen={isModalOpen}
+  onClose={() => setIsModalOpen(false)}
+  onSave={handleSaveSite}
+/>
     </div>
   );
 };
