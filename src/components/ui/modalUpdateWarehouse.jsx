@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import axios from "axios";
 
 export default function ModalUpdateWarehouse({ isOpen, onClose, onSave, initialData }) {
   const [formData, setFormData] = useState({
@@ -12,6 +13,19 @@ export default function ModalUpdateWarehouse({ isOpen, onClose, onSave, initialD
   });
 
   const [previews, setPreviews] = useState(Array(5).fill(null));
+  const [sites, setSites] = useState([]);
+
+  useEffect(() => {
+    const fetchSites = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/sites`);
+        setSites(res.data);
+      } catch (error) {
+        console.error("Error al cargar sitios:", error);
+      }
+    };
+    fetchSites();
+  }, []);
 
   useEffect(() => {
     if (initialData) {
@@ -109,8 +123,13 @@ export default function ModalUpdateWarehouse({ isOpen, onClose, onSave, initialD
             </div>
 
             <div>
-              <label htmlFor="site_id" className="block text-sm font-semibold text-gray-700 mb-1">ID de Sede</label>
-              <input id="site_id" name="site_id" type="number" value={formData.site_id} onChange={handleInputChange} className="w-full h-12 rounded-lg border border-gray-300 px-4 shadow-sm" />
+              <label htmlFor="site_id" className="block text-sm font-semibold text-gray-700 mb-1">Sede</label>
+              <select id="site_id" name="site_id" value={formData.site_id} onChange={handleInputChange} className="w-full h-12 rounded-lg border border-gray-300 px-4 shadow-sm">
+                <option value="">Selecciona una sede</option>
+                {sites.map(site => (
+                  <option key={site.site_id} value={site.site_id}>{site.name}</option>
+                ))}
+              </select>
             </div>
           </div>
 
