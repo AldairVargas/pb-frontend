@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import axios from "axios";
 
 export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
   const initialState = {
@@ -13,6 +14,25 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
 
   const [formData, setFormData] = useState(initialState);
   const [previews, setPreviews] = useState(Array(5).fill(null));
+  const [sites, setSites] = useState([]);
+
+  useEffect(() => {
+    const fetchSites = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/sites`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setSites(response.data);
+      } catch (error) {
+        console.error("Error al cargar sedes:", error);
+      }
+    };
+
+    if (isOpen) fetchSites();
+  }, [isOpen]);
 
   const handleClose = () => {
     setFormData(initialState);
@@ -54,13 +74,8 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-white shadow-xl rounded-2xl w-full max-w-5xl overflow-hidden">
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Registrar nueva bodega
-          </h2>
-          <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
+          <h2 className="text-2xl font-bold text-gray-800">Registrar nueva bodega</h2>
+          <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
@@ -68,12 +83,7 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
         <form className="px-8 py-6 space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label
-                htmlFor="code"
-                className="block text-sm font-semibold text-gray-700 mb-1"
-              >
-                Código de la bodega
-              </label>
+              <label htmlFor="code" className="block text-sm font-semibold text-gray-700 mb-1">Código de la bodega</label>
               <input
                 id="code"
                 type="text"
@@ -82,18 +92,12 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
                 value={formData.code}
                 onChange={handleInputChange}
                 className="w-full h-12 rounded-lg border border-gray-300 px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                maxLength={15}
                 required
               />
             </div>
 
             <div>
-              <label
-                htmlFor="dimensions"
-                className="block text-sm font-semibold text-gray-700 mb-1"
-              >
-                Dimensiones
-              </label>
+              <label htmlFor="dimensions" className="block text-sm font-semibold text-gray-700 mb-1">Dimensiones</label>
               <input
                 id="dimensions"
                 type="text"
@@ -102,18 +106,12 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
                 value={formData.dimensions}
                 onChange={handleInputChange}
                 className="w-full h-12 rounded-lg border border-gray-300 px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                maxLength={50}
                 required
               />
             </div>
 
             <div>
-              <label
-                htmlFor="monthly_price"
-                className="block text-sm font-semibold text-gray-700 mb-1"
-              >
-                Precio mensual
-              </label>
+              <label htmlFor="monthly_price" className="block text-sm font-semibold text-gray-700 mb-1">Precio mensual</label>
               <input
                 id="monthly_price"
                 type="number"
@@ -128,12 +126,7 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
             </div>
 
             <div>
-              <label
-                htmlFor="status"
-                className="block text-sm font-semibold text-gray-700 mb-1"
-              >
-                Estado inicial
-              </label>
+              <label htmlFor="status" className="block text-sm font-semibold text-gray-700 mb-1">Estado inicial</label>
               <select
                 id="status"
                 name="status"
@@ -150,52 +143,40 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
             </div>
 
             <div>
-              <label
-                htmlFor="site_id"
-                className="block text-sm font-semibold text-gray-700 mb-1"
-              >
-                ID de la sede
-              </label>
-              <input
+              <label htmlFor="site_id" className="block text-sm font-semibold text-gray-700 mb-1">Selecciona la sede</label>
+              <select
                 id="site_id"
-                type="number"
                 name="site_id"
-                placeholder="Ej. 1"
                 value={formData.site_id}
                 onChange={handleInputChange}
-                className="w-full h-12 rounded-lg border border-gray-300 px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full h-12 appearance-none rounded-lg border border-gray-300 px-4 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
-              />
+              >
+                <option value="">Selecciona una sede</option>
+                {sites.map((site) => (
+                  <option key={site.site_id} value={site.site_id}>
+                    {site.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
-              Fotos
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 mb-3">Fotos</label>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {previews.map((preview, index) => (
                 <div
                   key={index}
                   className={`border-2 border-dashed rounded-lg p-2 h-32 flex items-center justify-center relative cursor-pointer ${
-                    preview
-                      ? "border-blue-500"
-                      : "border-gray-300 hover:border-gray-400"
+                    preview ? "border-blue-500" : "border-gray-300 hover:border-gray-400"
                   }`}
-                  onClick={() =>
-                    document.getElementById(`photo-input-${index}`).click()
-                  }
+                  onClick={() => document.getElementById(`photo-input-${index}`).click()}
                 >
                   {preview ? (
-                    <img
-                      src={preview}
-                      alt={`Preview ${index + 1}`}
-                      className="h-full w-full object-cover rounded-lg"
-                    />
+                    <img src={preview} alt={`Preview ${index + 1}`} className="h-full w-full object-cover rounded-lg" />
                   ) : (
-                    <span className="text-xs text-gray-500 text-center">
-                      Click para subir <br /> foto {index + 1}
-                    </span>
+                    <span className="text-xs text-gray-500 text-center">Click para subir <br /> foto {index + 1}</span>
                   )}
                   <input
                     id={`photo-input-${index}`}
@@ -219,13 +200,13 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
             </button>
             <button
               type="submit"
-              className="px-6 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-all"
               onClick={(e) => {
                 e.preventDefault();
-                onSave(formData); // 👉 guarda los datos
-                setFormData(initialState); // 🧹 limpia los campos
-                setPreviews(Array(5).fill(null)); // 🧹 limpia las fotos
+                onSave(formData);
+                setFormData(initialState);
+                setPreviews(Array(5).fill(null));
               }}
+              className="px-6 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-all"
             >
               Guardar bodega
             </button>
