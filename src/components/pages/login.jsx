@@ -51,7 +51,7 @@ const MyLogin = ({ onSwitchForm }) => {
         } else if (userRole === "SuperAdmin") {
           navigate("/admin");
         } else {
-          navigate(from);
+          navigate('/cliente');
         }
       }
     } catch (error) {
