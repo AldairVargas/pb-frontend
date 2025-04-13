@@ -32,7 +32,6 @@ function App() {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/gallery" element={<WarehouseGallery />} />
           <Route path="/warehouse/:id" element={<WarehouseDetail />} />
-          <Route path="/cliente" element={<DashboardCliente/>}/>
 
           {/* Rutas protegidas */}
           <Route
@@ -63,13 +62,13 @@ function App() {
             }
           />
 
-          {/* <Route path="/client"
+          <Route path="/cliente"
           element={
             <PrivateRoute
             element={<DashboardCliente />}
             allowedRoles={["User"]}
             />
-          }/> */}
+          }/>
         </Routes>
       </Router>
     </AuthProvider>
