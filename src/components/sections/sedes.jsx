@@ -4,9 +4,15 @@ import { Plus } from "lucide-react";
 import { toast } from "react-toastify";
 import ModalSaveSite from "../ui/modalSaveSites";
 import estadosData from "../../assets/json/estados.json";
+import { Pencil, Trash2 } from "lucide-react";
 
 const SedesAdmin = () => {
-  const { data: sedes, fetchData, saveData, deleteData } = useCRUD(`${import.meta.env.VITE_API_URL}/sites`);
+  const {
+    data: sedes,
+    fetchData,
+    saveData,
+    deleteData,
+  } = useCRUD(`${import.meta.env.VITE_API_URL}/sites`);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSite, setEditingSite] = useState(null);
@@ -37,10 +43,20 @@ const SedesAdmin = () => {
       };
 
       if (editingSite) {
-        await saveData(`${import.meta.env.VITE_API_URL}/sites/${editingSite.site_id}`, "PUT", payload, headers);
+        await saveData(
+          `${import.meta.env.VITE_API_URL}/sites/${editingSite.site_id}`,
+          "PUT",
+          payload,
+          headers
+        );
         toast.success("Sede actualizada con éxito");
       } else {
-        await saveData(`${import.meta.env.VITE_API_URL}/sites`, "POST", payload, headers);
+        await saveData(
+          `${import.meta.env.VITE_API_URL}/sites`,
+          "POST",
+          payload,
+          headers
+        );
         toast.success("Sede registrada con éxito");
       }
 
@@ -53,7 +69,9 @@ const SedesAdmin = () => {
       if (Array.isArray(apiErrors)) {
         apiErrors.forEach((err) => toast.error(`${err.field}: ${err.message}`));
       } else {
-        toast.error(error.response?.data?.message || "Ocurrió un error al guardar la sede");
+        toast.error(
+          error.response?.data?.message || "Ocurrió un error al guardar la sede"
+        );
       }
     }
   };
@@ -68,15 +86,20 @@ const SedesAdmin = () => {
               className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
               onClick={async () => {
                 try {
-                  await deleteData(`${import.meta.env.VITE_API_URL}/sites/${siteId}`, {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                  });
+                  await deleteData(
+                    `${import.meta.env.VITE_API_URL}/sites/${siteId}`,
+                    {
+                      Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    }
+                  );
                   toast.success("Sede eliminada correctamente");
                   fetchData();
                 } catch (error) {
                   const message = error.response?.data?.message;
                   if (message?.includes("being used by other records")) {
-                    toast.error("No se puede eliminar esta sede porque está en uso.");
+                    toast.error(
+                      "No se puede eliminar esta sede porque está en uso."
+                    );
                   } else {
                     toast.error("Ocurrió un error al eliminar la sede.");
                   }
@@ -133,39 +156,49 @@ const SedesAdmin = () => {
           </thead>
           <tbody className="text-gray-800 text-base">
             {sedes?.map((sede) => {
-              const { estadoNombre, municipioNombre } = getEstadoMunicipio(sede.state, sede.municipality);
+              const { estadoNombre, municipioNombre } = getEstadoMunicipio(
+                sede.state,
+                sede.municipality
+              );
               return (
-                <tr key={sede.site_id} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                <tr
+                  key={sede.site_id}
+                  className="border-b border-gray-100 hover:bg-gray-50 transition"
+                >
                   <td className="px-6 py-4 text-center">{sede.name}</td>
                   <td className="px-6 py-4 text-center">
-                    {`${sede.location}, ${municipioNombre || "Municipio"}, ${estadoNombre || "Estado"}`}
-                  </td>
-                  <td className="px-6 py-4">
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      sede.status === 1
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
+                    {`${sede.location}, ${municipioNombre || "Municipio"}, ${
+                      estadoNombre || "Estado"
                     }`}
-                  >
-                    {sede.status === 1 ? "Activo" : "Inactivo"}
-                  </span>
-                </td>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        sede.status === 1
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {sede.status === 1 ? "Activo" : "Inactivo"}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 flex justify-center gap-4">
                     <button
                       onClick={() => {
                         setEditingSite(sede);
                         setIsModalOpen(true);
                       }}
-                      className="text-blue-600 hover:underline"
+                      className="text-blue-600 hover:text-blue-800"
+                      title="Editar"
                     >
-                      Editar
+                      <Pencil className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleDeleteSite(sede.site_id)}
-                      className="text-red-600 hover:underline"
+                      className="text-red-600 hover:text-red-800"
+                      title="Eliminar"
                     >
-                      Eliminar
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   </td>
                 </tr>

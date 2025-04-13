@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import useCRUD from "../../hooks/useCRUD";
 
 const AlmacenesAdmin = () => {
-  const { data: almacenes, fetchData, saveData } = useCRUD(`${import.meta.env.VITE_API_URL}/warehouses`);
+  const {
+    data: almacenes,
+    fetchData,
+    saveData,
+  } = useCRUD(`${import.meta.env.VITE_API_URL}/warehouses`);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
@@ -19,10 +23,13 @@ const AlmacenesAdmin = () => {
   const handleConfirmToggleStatus = async () => {
     try {
       await saveData(
-        `${import.meta.env.VITE_API_URL}/warehouses/${selectedWarehouse.warehouse_id}/status`,
+        `${import.meta.env.VITE_API_URL}/warehouses/${
+          selectedWarehouse.warehouse_id
+        }/status`,
         "put",
         {
-          status: selectedWarehouse.status === "occupied" ? "available" : "occupied",
+          status:
+            selectedWarehouse.status === "occupied" ? "available" : "occupied",
         }
       );
       fetchData();
@@ -46,33 +53,28 @@ const AlmacenesAdmin = () => {
               <th className="px-6 py-4 font-semibold">Dimensiones</th>
               <th className="px-6 py-4 font-semibold">Precio mensual</th>
               <th className="px-6 py-4 font-semibold">Estado</th>
-              <th className="px-6 py-4 text-center font-semibold">Acciones</th>
             </tr>
           </thead>
           <tbody className="text-gray-800 text-base">
             {almacenes?.map((almacen) => (
-              <tr key={almacen.warehouse_id} className="border-b border-gray-100 hover:bg-gray-50 transition">
+              <tr
+                key={almacen.warehouse_id}
+                className="border-b border-gray-100 hover:bg-gray-50 transition"
+              >
                 <td className="px-6 py-4">{almacen.code}</td>
                 <td className="px-6 py-4">{almacen.Site?.name}</td>
                 <td className="px-6 py-4">{almacen.dimensions}</td>
                 <td className="px-6 py-4">${almacen.monthly_price}</td>
                 <td className="px-6 py-4">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    almacen.status === "occupied"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-green-100 text-green-700"
-                  }`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      almacen.status === "occupied"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-green-100 text-green-700"
+                    }`}
+                  >
                     {almacen.status === "occupied" ? "Ocupado" : "Disponible"}
                   </span>
-                </td>
-                <td className="px-6 py-4 text-center space-x-3">
-                  <button className="text-blue-600 hover:underline font-medium">Editar</button>
-                  <button
-                    onClick={() => confirmToggleStatus(almacen)}
-                    className="text-red-600 hover:underline font-medium"
-                  >
-                    {almacen.status === "occupied" ? "Desactivar" : "Activar"}
-                  </button>
                 </td>
               </tr>
             ))}
@@ -89,7 +91,9 @@ const AlmacenesAdmin = () => {
                 ? "¿Desactivar esta bodega?"
                 : "¿Activar esta bodega?"}
             </h2>
-            <p className="text-sm text-gray-600 mb-6">Esta acción actualizará el estado de la bodega.</p>
+            <p className="text-sm text-gray-600 mb-6">
+              Esta acción actualizará el estado de la bodega.
+            </p>
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => setIsDeleteModalOpen(false)}

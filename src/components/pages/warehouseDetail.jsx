@@ -13,7 +13,9 @@ export default function WarehouseDetail() {
   useEffect(() => {
     const fetchWarehouse = async () => {
       try {
-        const data = await readItem(`${import.meta.env.VITE_API_URL}/warehouses/${id}`);
+        const data = await readItem(
+          `${import.meta.env.VITE_API_URL}/warehouses/${id}`
+        );
 
         const photos = [];
         for (let i = 1; i <= 5; i++) {
@@ -110,16 +112,6 @@ export default function WarehouseDetail() {
 
         {/* Información */}
         <div className="w-full lg:w-1/2 space-y-4">
-          <span
-            className={`text-sm px-3 py-1 rounded-full uppercase font-medium tracking-wide w-fit ${
-              warehouse.status === "available"
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-800"
-            }`}
-          >
-            {warehouse.status === "available" ? "Disponible" : "Ocupado"}
-          </span>
-
           <h2 className="text-3xl font-bold">Bodega {warehouse.code}</h2>
           <p className="text-gray-600">Ubicación: {warehouse.Site?.name}</p>
           <p className="text-gray-600">Dirección: {warehouse.Site?.location}</p>
@@ -137,7 +129,15 @@ export default function WarehouseDetail() {
             </p>
             <p className="text-gray-700">
               <strong>Estado:</strong>{" "}
-              {warehouse.status === "available" ? "Disponible" : "Ocupado"}
+              <span
+                className={`text-sm px-3 py-1 rounded-full uppercase font-medium tracking-wide w-fit ${
+                  warehouse.status === "available"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {warehouse.status === "available" ? "Disponible" : "Ocupado"}
+              </span>
             </p>
           </div>
 

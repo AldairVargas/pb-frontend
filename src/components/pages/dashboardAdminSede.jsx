@@ -7,6 +7,7 @@ import Reportes from "../sections/reportes";
 import ModalSaveWarehouse from "../ui/modalSaveWarehouse";
 import useCRUD from "../../hooks/useCRUD";
 import { toast } from "react-toastify";
+import { Plus } from "lucide-react";
 
 const DashboardAdminSede = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,17 +33,25 @@ const DashboardAdminSede = () => {
 
       base64Results.forEach((base64, i) => {
         if (base64) {
-          payload[`photo${i + 1}`] = base64.replace(/^data:image\/\w+;base64,/, "");
+          payload[`photo${i + 1}`] = base64.replace(
+            /^data:image\/\w+;base64,/,
+            ""
+          );
         }
       });
 
-      await saveData(`${import.meta.env.VITE_API_URL}/warehouses`, "POST", payload, {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      });
+      await saveData(
+        `${import.meta.env.VITE_API_URL}/warehouses`,
+        "POST",
+        payload,
+        {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        }
+      );
 
       toast.success("Bodega registrada con éxito");
-      setReloadBodegas(prev => !prev); // 🔁 fuerza recarga en BodegasList
+      setReloadBodegas((prev) => !prev); // 🔁 fuerza recarga en BodegasList
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error al guardar la bodega:", error);
@@ -74,12 +83,15 @@ const DashboardAdminSede = () => {
 
         <section id="bodegas" className="px-6 pt-2 pb-3">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-4xl font-bold text-blue-600 mb-6 px-6">Bodegas</h1>
+            <h1 className="text-4xl font-bold text-blue-600 mb-6 px-6">
+              Bodegas
+            </h1>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
-              Registrar nueva bodega
+              <Plus className="w-4 h-4" />
+              Crear bodega
             </button>
           </div>
           <BodegasList reload={reloadBodegas} />

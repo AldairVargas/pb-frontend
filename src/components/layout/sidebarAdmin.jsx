@@ -8,43 +8,61 @@ import {
   List,
   LogOut,
   Menu,
-  Warehouse
+  Warehouse,
+  X
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 const SidebarAdmin = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Cierra el menú si se hace clic fuera
+  // Cerrar menú al hacer clic fuera
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (!e.target.closest("#mobile-menu") && !e.target.closest("#menu-button")) {
+    let timeout;
+
+    const handleOutsideClick = (e) => {
+      if (
+        !e.target.closest("#mobile-drawer") &&
+        !e.target.closest("#menu-button")
+      ) {
         setIsOpen(false);
       }
     };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
 
-  // Controla el scroll del fondo
+    timeout = setTimeout(() => {
+      document.addEventListener("click", handleOutsideClick);
+    }, 0);
+
+    return () => {
+      clearTimeout(timeout);
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, [isOpen]);
+
+  // Bloquear scroll del body
   useEffect(() => {
     document.body.classList.toggle("overflow-hidden", isOpen);
   }, [isOpen]);
 
   return (
     <>
-      {/* Navbar para móviles */}
+      {/* Navbar móvil */}
       <div className="md:hidden flex items-center justify-between p-4 bg-white shadow fixed top-0 left-0 right-0 z-50 h-16">
         <div className="flex items-center space-x-2">
           <Boxes className="w-6 h-6 text-blue-600" />
           <h2 className="text-lg font-bold text-blue-600">Bodega segura</h2>
         </div>
         <button id="menu-button" onClick={() => setIsOpen(!isOpen)}>
-          <Menu className="w-6 h-6 text-blue-600" />
+          {isOpen ? (
+            <X className="w-6 h-6 text-blue-600 transition-transform duration-300" />
+          ) : (
+            <Menu className="w-6 h-6 text-blue-600 transition-transform duration-300" />
+          )}
         </button>
       </div>
 
-      {/* Sidebar en escritorio */}
+      {/* Sidebar escritorio */}
       <aside className="hidden md:flex flex-col min-h-screen w-64 bg-white shadow-md px-4 py-6 border-r border-gray-200">
         <div className="flex items-center justify-center mb-8 space-x-2">
           <div className="bg-blue-100 p-2 rounded-full shadow-sm">
@@ -55,21 +73,27 @@ const SidebarAdmin = () => {
         <NavLinks />
       </aside>
 
-      {/* Menú desplegable móvil con animación */}
-      {isOpen && (
-        <motion.div
-          id="mobile-menu"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="fixed top-16 left-0 right-0 bottom-0 bg-white border-t shadow z-40 overflow-y-auto md:hidden"
-        >
-          <NavLinks onClick={() => setIsOpen(false)} />
-        </motion.div>
-      )}
+      {/* Drawer móvil */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            id="mobile-drawer"
+            className="fixed top-0 left-0 bottom-0 w-64 bg-white z-50 shadow-md md:hidden p-4 overflow-y-auto"
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <div className="flex items-center mb-6 space-x-2">
+              <Warehouse className="w-6 h-6 text-blue-600" />
+              <h2 className="text-xl font-bold text-blue-600">Bodega segura</h2>
+            </div>
+            <NavLinks onClick={() => setIsOpen(false)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Espaciado para evitar que el contenido quede detrás de la navbar */}
+      {/* Espaciado para navbar móvil */}
       <div className="md:hidden h-16" />
     </>
   );
@@ -80,42 +104,62 @@ const NavLinks = ({ onClick }) => {
 
   const handleLogout = () => {
     logout();
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   return (
-  <nav className="flex flex-col md:space-y-4 p-4 space-y-2">
-    <a href="#dashboard" onClick={onClick} className="flex items-center px-4 py-2 rounded-lg hover:bg-blue-50 transition">
-      <Home className="w-5 h-5 mr-2 text-blue-600" />
-      <span className="text-sm font-medium text-gray-700">Dashboard</span>
-    </a>
-    <a href="#usuarios" onClick={onClick} className="flex items-center px-4 py-2 rounded-lg hover:bg-blue-50 transition">
-      <Users className="w-5 h-5 mr-2 text-blue-600" />
-      <span className="text-sm font-medium text-gray-700">Usuarios</span>
-    </a>
-    <a href="#sedes" onClick={onClick} className="flex items-center px-4 py-2 rounded-lg hover:bg-blue-50 transition">
-      <Building className="w-5 h-5 mr-2 text-blue-600" />
-      <span className="text-sm font-medium text-gray-700">Sedes</span>
-    </a>
-    <a href="#almacenes" onClick={onClick} className="flex items-center px-4 py-2 rounded-lg hover:bg-blue-50 transition">
-      <Boxes className="w-5 h-5 mr-2 text-blue-600" />
-      <span className="text-sm font-medium text-gray-700">Almacenes</span>
-    </a>
-    <a href="#reportes" onClick={onClick} className="flex items-center px-4 py-2 rounded-lg hover:bg-blue-50 transition">
-      <List className="w-5 h-5 mr-2 text-blue-600" />
-      <span className="text-sm font-medium text-gray-700">Reportes</span>
-    </a>
-    <button 
-      onClick={() => {
-        if (onClick) onClick();
-        handleLogout();
-      }} 
-      className="flex items-center mt-6 px-4 py-2 text-sm font-medium text-red-500 hover:text-red-700 transition"
-    >
-      <LogOut className="w-5 h-5 mr-2" />
-      Cerrar sesión
-    </button>
-  </nav>
+    <nav className="flex flex-col md:space-y-4 p-4 space-y-2">
+      <a
+        href="#dashboard"
+        onClick={onClick}
+        className="flex items-center px-4 py-2 rounded-lg hover:bg-blue-50 transition"
+      >
+        <Home className="w-5 h-5 mr-2 text-blue-600" />
+        <span className="text-sm font-medium text-gray-700">Dashboard</span>
+      </a>
+      <a
+        href="#usuarios"
+        onClick={onClick}
+        className="flex items-center px-4 py-2 rounded-lg hover:bg-blue-50 transition"
+      >
+        <Users className="w-5 h-5 mr-2 text-blue-600" />
+        <span className="text-sm font-medium text-gray-700">Usuarios</span>
+      </a>
+      <a
+        href="#sedes"
+        onClick={onClick}
+        className="flex items-center px-4 py-2 rounded-lg hover:bg-blue-50 transition"
+      >
+        <Building className="w-5 h-5 mr-2 text-blue-600" />
+        <span className="text-sm font-medium text-gray-700">Sedes</span>
+      </a>
+      <a
+        href="#almacenes"
+        onClick={onClick}
+        className="flex items-center px-4 py-2 rounded-lg hover:bg-blue-50 transition"
+      >
+        <Boxes className="w-5 h-5 mr-2 text-blue-600" />
+        <span className="text-sm font-medium text-gray-700">Almacenes</span>
+      </a>
+      <a
+        href="#reportes"
+        onClick={onClick}
+        className="flex items-center px-4 py-2 rounded-lg hover:bg-blue-50 transition"
+      >
+        <List className="w-5 h-5 mr-2 text-blue-600" />
+        <span className="text-sm font-medium text-gray-700">Reportes</span>
+      </a>
+      <button
+        onClick={() => {
+          if (onClick) onClick();
+          handleLogout();
+        }}
+        className="flex items-center mt-6 px-4 py-2 text-sm font-medium text-red-500 hover:text-red-700 transition"
+      >
+        <LogOut className="w-5 h-5 mr-2" />
+        Cerrar sesión
+      </button>
+    </nav>
   );
 };
 
