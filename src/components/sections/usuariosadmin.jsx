@@ -3,10 +3,8 @@ import useCRUD from "../../hooks/useCRUD";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Dialog } from "@headlessui/react";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Pencil, Power } from "lucide-react";
 import { toast } from "react-toastify";
-import { Pencil, Power } from "lucide-react";
-
 
 const validationSchema = Yup.object({
   email: Yup.string().email("Formato inválido").required("Requerido"),
@@ -37,9 +35,7 @@ const UsuariosAdmin = () => {
   const token = localStorage.getItem("token");
 
   const headers = useMemo(
-    () => ({
-      Authorization: `Bearer ${token}`,
-    }),
+    () => ({ Authorization: `Bearer ${token}` }),
     [token]
   );
 
@@ -48,6 +44,7 @@ const UsuariosAdmin = () => {
     fetchData,
     saveData,
   } = useCRUD(`${import.meta.env.VITE_API_URL}/users`, headers);
+
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -56,17 +53,8 @@ const UsuariosAdmin = () => {
 
   const handleCreateUser = async (values, { resetForm, setSubmitting }) => {
     try {
-      const payload = {
-        ...values,
-        active: true, // se crea como activo
-      };
-
-      await saveData(
-        `${import.meta.env.VITE_API_URL}/users`,
-        "POST",
-        payload,
-        headers
-      );
+      const payload = { ...values, active: true };
+      await saveData(`${import.meta.env.VITE_API_URL}/users`, "POST", payload, headers);
       toast.success("Usuario creado correctamente");
       fetchData();
       setIsOpen(false);
@@ -81,42 +69,21 @@ const UsuariosAdmin = () => {
 
   const toggleUserStatus = (user) => {
     const newStatus = !user.active;
-
     toast.info(
       <div>
-        <p>
-          ¿Seguro que deseas{" "}
-          <strong>{newStatus ? "activar" : "desactivar"}</strong> este usuario?
-        </p>
+        <p>¿Seguro que deseas <strong>{newStatus ? "activar" : "desactivar"}</strong> este usuario?</p>
         <div className="mt-2 flex justify-end gap-3">
           <button
             className="text-sm text-gray-600 hover:underline"
             onClick={() => toast.dismiss()}
-          >
-            Cancelar
-          </button>
+          >Cancelar</button>
           <button
-            className={`text-sm font-semibold ${
-              newStatus ? "text-green-600" : "text-red-600"
-            } hover:underline`}
+            className={`text-sm font-semibold ${newStatus ? "text-green-600" : "text-red-600"} hover:underline`}
             onClick={async () => {
               try {
-                await saveData(
-                  `${import.meta.env.VITE_API_URL}/users/${
-                    user.user_id
-                  }/status`,
-                  "PUT",
-                  { active: newStatus },
-                  {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                  }
-                );
+                await saveData(`${import.meta.env.VITE_API_URL}/users/${user.user_id}/status`, "PUT", { active: newStatus }, headers);
                 toast.dismiss();
-                toast.success(
-                  `Usuario ${
-                    newStatus ? "activado" : "desactivado"
-                  } correctamente`
-                );
+                toast.success(`Usuario ${newStatus ? "activado" : "desactivado"} correctamente`);
                 fetchData();
               } catch (err) {
                 toast.dismiss();
@@ -124,9 +91,7 @@ const UsuariosAdmin = () => {
                 console.error(err);
               }
             }}
-          >
-            Confirmar
-          </button>
+          >Confirmar</button>
         </div>
       </div>,
       {
@@ -165,38 +130,20 @@ const UsuariosAdmin = () => {
           <tbody className="text-center">
             {usuarios?.map((user) => (
               <tr key={user.user_id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  {user.first_name} {user.last_name}
-                </td>
+                <td className="px-6 py-4">{user.first_name} {user.last_name}</td>
                 <td className="px-6 py-4">{user.email}</td>
                 <td className="px-6 py-4">{user.Role?.role_name}</td>
                 <td className="px-6 py-4">
-                  <span
-                    className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${
-                      user.active
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {user.active ? "Activo" : "Inactivo"}
-                  </span>
+                  <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${user.active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{user.active ? "Activo" : "Inactivo"}</span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex justify-center gap-4">
-                    <button
-                      onClick={() => openEditModal(user.user_id)}
-                      className="text-blue-600 hover:text-blue-800"
-                      title="Editar"
-                    >
+                    <button className="text-blue-600 hover:text-blue-800" title="Editar">
                       <Pencil className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => toggleUserStatus(user)}
-                      className={`${
-                        user.active
-                          ? "text-red-600 hover:text-red-800"
-                          : "text-green-600 hover:text-green-800"
-                      }`}
+                      className={`${user.active ? "text-red-600 hover:text-red-800" : "text-green-600 hover:text-green-800"}`}
                       title={user.active ? "Desactivar" : "Activar"}
                     >
                       <Power className="w-5 h-5" />
@@ -210,25 +157,13 @@ const UsuariosAdmin = () => {
       </div>
 
       {/* Modal de creación */}
-      <Dialog
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-        className="relative z-50"
-      >
-        <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm"
-          aria-hidden="true"
-        />
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-xl border border-gray-200">
             <div className="flex justify-between items-center mb-4">
-              <Dialog.Title className="text-xl font-semibold text-gray-800">
-                Crear Usuario
-              </Dialog.Title>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
+              <Dialog.Title className="text-xl font-semibold text-gray-800">Crear Usuario</Dialog.Title>
+              <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -249,79 +184,39 @@ const UsuariosAdmin = () => {
                 <Form className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Nombre
-                      </label>
-                      <Field name="first_name" className="input w-full" />
-                      <ErrorMessage
-                        name="first_name"
-                        component="div"
-                        className="text-red-500 text-sm"
-                      />
+                      <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                      <Field name="first_name" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                      <ErrorMessage name="first_name" component="div" className="text-red-500 text-sm" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Apellido
-                      </label>
-                      <Field name="last_name" className="input w-full" />
-                      <ErrorMessage
-                        name="last_name"
-                        component="div"
-                        className="text-red-500 text-sm"
-                      />
+                      <label className="block text-sm font-medium text-gray-700">Apellido</label>
+                      <Field name="last_name" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                      <ErrorMessage name="last_name" component="div" className="text-red-500 text-sm" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Correo
-                    </label>
-                    <Field name="email" type="email" className="input w-full" />
-                    <ErrorMessage
-                      name="email"
-                      component="div"
-                      className="text-red-500 text-sm"
-                    />
+                    <label className="block text-sm font-medium text-gray-700">Correo</label>
+                    <Field name="email" type="email" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                    <ErrorMessage name="email" component="div" className="text-red-500 text-sm" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Teléfono
-                    </label>
-                    <Field name="phone" className="input w-full" />
-                    <ErrorMessage
-                      name="phone"
-                      component="div"
-                      className="text-red-500 text-sm"
-                    />
+                    <label className="block text-sm font-medium text-gray-700">Teléfono</label>
+                    <Field name="phone" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                    <ErrorMessage name="phone" component="div" className="text-red-500 text-sm" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Contraseña
-                    </label>
-                    <Field
-                      name="password"
-                      type="password"
-                      className="input w-full"
-                    />
-                    <ErrorMessage
-                      name="password"
-                      component="div"
-                      className="text-red-500 text-sm"
-                    />
+                    <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+                    <Field name="password" type="password" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                    <ErrorMessage name="password" component="div" className="text-red-500 text-sm" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Rol
-                    </label>
-                    <Field as="select" name="role_id" className="input w-full">
+                    <label className="block text-sm font-medium text-gray-700">Rol</label>
+                    <Field as="select" name="role_id" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                       <option value="1">Admin</option>
                       <option value="2">User</option>
                       <option value="3">SuperAdmin</option>
                     </Field>
-                    <ErrorMessage
-                      name="role_id"
-                      component="div"
-                      className="text-red-500 text-sm"
-                    />
+                    <ErrorMessage name="role_id" component="div" className="text-red-500 text-sm" />
                   </div>
                   <div className="flex justify-end mt-6">
                     <button

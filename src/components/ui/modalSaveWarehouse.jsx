@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
   const initialState = {
@@ -20,11 +21,14 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
     const fetchSites = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/sites`, {
-          headers: {
-            Authorization: `Bearer ${token}`
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/sites`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
+        );
         setSites(response.data);
       } catch (error) {
         console.error("Error al cargar sedes:", error);
@@ -68,6 +72,28 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
     }));
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const totalSize = formData.photos.reduce((acc, file) => {
+      return acc + (file ? file.size : 0);
+    }, 0);
+
+    if (totalSize > 10 * 1024 * 1024) {
+      toast.error("El tamaño total de las imágenes no debe superar los 10MB");
+      return;
+    }
+
+    const formattedData = {
+      ...formData,
+      dimensions: `${formData.dimensions} meters`,
+    };
+
+    onSave(formattedData);
+    setFormData(initialState);
+    setPreviews(Array(5).fill(null));
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -80,7 +106,7 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
           </button>
         </div>
 
-        <form className="px-8 py-6 space-y-8">
+        <form className="px-8 py-6 space-y-8" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label htmlFor="code" className="block text-sm font-semibold text-gray-700 mb-1">Código de la bodega</label>
@@ -97,15 +123,19 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
             </div>
 
             <div>
-              <label htmlFor="dimensions" className="block text-sm font-semibold text-gray-700 mb-1">Dimensiones</label>
+              <label htmlFor="dimensions" className="block text-sm font-semibold text-gray-700 mb-1">
+                Dimensiones
+              </label>
               <input
                 id="dimensions"
                 type="text"
                 name="dimensions"
-                placeholder="Ej. 5x4x3 metros"
+                placeholder="Ej. 5x5x5"
                 value={formData.dimensions}
                 onChange={handleInputChange}
                 className="w-full h-12 rounded-lg border border-gray-300 px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                pattern="^\d+x\d+x\d+$"
+                title="Formato esperado: 5x5x5"
                 required
               />
             </div>
@@ -163,7 +193,12 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">Fotos</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Fotos <span className="text-xs text-red-500">(máx. total 10MB)</span>
+            </label>
+            <p className="text-sm text-gray-500 mb-2">
+              Sube hasta 5 fotos. El tamaño total no debe superar los <strong>10MB</strong>.
+            </p>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {previews.map((preview, index) => (
                 <div
@@ -174,9 +209,15 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
                   onClick={() => document.getElementById(`photo-input-${index}`).click()}
                 >
                   {preview ? (
-                    <img src={preview} alt={`Preview ${index + 1}`} className="h-full w-full object-cover rounded-lg" />
+                    <img
+                      src={preview}
+                      alt={`Preview ${index + 1}`}
+                      className="h-full w-full object-cover rounded-lg"
+                    />
                   ) : (
-                    <span className="text-xs text-gray-500 text-center">Click para subir <br /> foto {index + 1}</span>
+                    <span className="text-xs text-gray-500 text-center">
+                      Click para subir <br /> foto {index + 1}
+                    </span>
                   )}
                   <input
                     id={`photo-input-${index}`}
@@ -200,12 +241,6 @@ export default function ModalSaveWarehouse({ isOpen, onClose, onSave }) {
             </button>
             <button
               type="submit"
-              onClick={(e) => {
-                e.preventDefault();
-                onSave(formData);
-                setFormData(initialState);
-                setPreviews(Array(5).fill(null));
-              }}
               className="px-6 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-all"
             >
               Guardar bodega

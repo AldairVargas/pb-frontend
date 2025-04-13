@@ -6,7 +6,7 @@ export default function WarehouseGallery() {
   const animatedText = "Soluciones de almacenamiento para todos";
 
   return (
-    <div className="pt-20 px-4 md:px-12 bg-gray-100 min-h-screen">
+    <div className="pt-20 px-4 md:px-12  min-h-screen ">
       <section className="flex flex-col items-center">
         <div className="flex max-w-xl flex-col items-center pb-16 pt-8 text-center lg:pb-24 lg:pt-20">
           <h1 className="mb-8 text-4xl font-bold text-black sm:text-5xl md:mb-12 md:text-6xl">

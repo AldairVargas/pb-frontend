@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import useCRUD from "../../hooks/useCRUD";
 import ImageGallery from "react-image-gallery";
+import { toast } from "react-toastify";
 import "react-image-gallery/styles/css/image-gallery.css";
 
 export default function WarehouseDetail() {
   const { id } = useParams();
-  const { readItem } = useCRUD();
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const { readItem, saveData } = useCRUD();
   const [warehouse, setWarehouse] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
 
@@ -16,8 +19,8 @@ export default function WarehouseDetail() {
         const data = await readItem(
           `${import.meta.env.VITE_API_URL}/warehouses/${id}`
         );
-
         const photos = [];
+
         for (let i = 1; i <= 5; i++) {
           const key = `photo${i}`;
           if (data[key]) {
@@ -33,8 +36,29 @@ export default function WarehouseDetail() {
       }
     };
 
-    fetchWarehouse(); // Solo se ejecuta cuando cambia el ID
-  }, [id]); // ✅ quitamos readItem del array de dependencias
+    fetchWarehouse();
+  }, [id]);
+
+  const handleReservation = async () => {
+    if (!token) {
+      navigate("/auth");
+      return;
+    }
+
+    try {
+      await saveData(
+        `${import.meta.env.VITE_API_URL}/reservations`,
+        "post",
+        { warehouse_id: warehouse.warehouse_id },
+        { Authorization: `Bearer ${token}` }
+      );
+      toast.success("Bodega reservada con éxito");
+      navigate("/profile"); // redirige al perfil o donde gustes
+    } catch (error) {
+      toast.error("Error al reservar la bodega");
+      console.error("Reserva error:", error);
+    }
+  };
 
   if (!warehouse) return <div className="p-6">Cargando bodega...</div>;
 
@@ -55,56 +79,6 @@ export default function WarehouseDetail() {
                   alt=""
                   className="h-[350px] w-auto max-w-full object-contain mx-auto rounded-lg"
                 />
-              )}
-              renderLeftNav={(onClick, disabled) => (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onClick();
-                  }}
-                  disabled={disabled}
-                  className="absolute z-10 top-1/2 left-2 -translate-y-1/2 bg-white text-gray-800 rounded-full p-1 shadow hover:bg-gray-100"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                </button>
-              )}
-              renderRightNav={(onClick, disabled) => (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onClick();
-                  }}
-                  disabled={disabled}
-                  className="absolute z-10 top-1/2 right-2 -translate-y-1/2 bg-white text-gray-800 rounded-full p-1 shadow hover:bg-gray-100"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
               )}
             />
           </div>
@@ -141,11 +115,19 @@ export default function WarehouseDetail() {
             </p>
           </div>
 
-          <Link to="/auth">
-            <button className="cursor-pointer mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition">
-              Reservar esta bodega
-            </button>
-          </Link>
+          <button
+            onClick={handleReservation}
+            disabled={warehouse.status !== "available"}
+            className={`mt-6 w-full py-3 rounded-lg text-white font-medium transition ${
+              warehouse.status === "available"
+                ? "bg-blue-600 hover:bg-blue-700"
+                : "bg-gray-400 cursor-not-allowed"
+            }`}
+          >
+            {warehouse.status === "available"
+              ? "Reservar esta bodega"
+              : "No disponible"}
+          </button>
         </div>
       </div>
     </section>
