@@ -12,10 +12,12 @@ export default function GalleryMasonry() {
     fetchData();
   }, [fetchData]);
 
+  const bodegasDisponibles = almacenes?.filter(bodega => bodega.status === "available");
+
   return (
     <div className="p-6 min-h-screen">
       <div className="columns-1 sm:columns-2 md:columns-3 gap-4 space-y-4">
-        {almacenes?.map((img, idx) => (
+        {bodegasDisponibles?.map((img, idx) => (
           <div
             key={img.warehouse_id}
             onClick={() => navigate(`/warehouse/${img.warehouse_id}`)}

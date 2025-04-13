@@ -20,22 +20,22 @@ const UserProfile = () => {
     phone: ''
   });
 
+  // Cargar datos del usuario
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem('token');
       if (!token) return;
-      
+
       try {
         const decodedToken = jwtDecode(token);
         const userId = decodedToken.id;
-        
+
         if (userIdRef.current !== userId) {
           userIdRef.current = userId;
           const data = await readItem(`${import.meta.env.VITE_API_URL}/users/${userId}`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
           });
+
           if (data) {
             setUserData(data);
             setFormData({
@@ -55,7 +55,14 @@ const UserProfile = () => {
     fetchUserData();
   }, [readItem]);
 
-  if (loading || loadingData) {
+  // Redirección fuera del render para evitar el error
+  useEffect(() => {
+    if (!user || !userData) {
+      navigate('/');
+    }
+  }, [user, userData, navigate]);
+
+  if (loading || loadingData || !user || !userData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -64,11 +71,6 @@ const UserProfile = () => {
         </div>
       </div>
     );
-  }
-
-  if (!user || !userData) {
-    navigate('/');
-    return null;
   }
 
   const handleLogout = () => {
@@ -116,14 +118,11 @@ const UserProfile = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-          {/* Encabezado del perfil */}
           <div className="bg-blue-600 px-6 py-4">
             <h1 className="text-2xl font-bold text-white">Mi Perfil</h1>
           </div>
 
-          {/* Contenido del perfil */}
           <div className="p-6">
-            {/* Sección de información personal */}
             <section className="mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <User className="w-5 h-5 text-blue-600" />
@@ -136,7 +135,6 @@ const UserProfile = () => {
                     type="text"
                     name="first_name"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder="Tu nombre"
                     value={formData.first_name}
                     onChange={handleInputChange}
                     readOnly={!isEditing}
@@ -148,7 +146,6 @@ const UserProfile = () => {
                     type="text"
                     name="last_name"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder="Tu apellido"
                     value={formData.last_name}
                     onChange={handleInputChange}
                     readOnly={!isEditing}
@@ -160,7 +157,6 @@ const UserProfile = () => {
                     type="email"
                     name="email"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder="tu@email.com"
                     value={formData.email}
                     onChange={handleInputChange}
                     readOnly={!isEditing}
@@ -172,7 +168,6 @@ const UserProfile = () => {
                     type="tel"
                     name="phone"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder="Tu número de teléfono"
                     value={formData.phone}
                     onChange={handleInputChange}
                     readOnly={!isEditing}
@@ -181,7 +176,6 @@ const UserProfile = () => {
               </div>
             </section>
 
-            {/* Sección de métodos de pago (placeholder para futura integración con Stripe) */}
             <section className="mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <CreditCard className="w-5 h-5 text-blue-600" />
@@ -196,7 +190,6 @@ const UserProfile = () => {
               </button>
             </section>
 
-            {/* Sección de configuración */}
             <section className="mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <Settings className="w-5 h-5 text-blue-600" />
@@ -222,19 +215,18 @@ const UserProfile = () => {
               </div>
             </section>
 
-            {/* Botones de acción */}
             <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
               {isEditing ? (
                 <button
                   onClick={handleSubmit}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
                 >
                   Guardar Cambios
                 </button>
               ) : (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
                 >
                   <Edit2 className="w-4 h-4" />
                   Editar Información
@@ -242,7 +234,7 @@ const UserProfile = () => {
               )}
               <button
                 onClick={handleLogout}
-                className="px-6 py-2 text-red-600 border border-red-600 rounded-md hover:bg-red-50 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+                className="px-6 py-2 text-red-600 border border-red-600 rounded-md hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
               >
                 <LogOut className="w-4 h-4" />
                 Cerrar Sesión
