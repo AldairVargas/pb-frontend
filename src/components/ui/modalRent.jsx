@@ -23,6 +23,7 @@ export default function ModalRent({ isOpen, onClose, userId, warehouseId }) {
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const token = localStorage.getItem("token");
+
       const rentData = {
         start_date: values.start_date,
         expiration_date: values.expiration_date,
@@ -39,9 +40,14 @@ export default function ModalRent({ isOpen, onClose, userId, warehouseId }) {
 
       toast.success("Renta creada exitosamente");
       onClose();
+
+      // ✅ Recargar la página después de cerrar el modal
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
-      toast.error("Error al crear la renta");
       console.error("Error creando renta:", error);
+      toast.error("Error al crear la renta");
     } finally {
       setSubmitting(false);
     }
@@ -186,7 +192,9 @@ export default function ModalRent({ isOpen, onClose, userId, warehouseId }) {
                             disabled={isSubmitting}
                             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                           >
-                            {isSubmitting ? "Procesando..." : "Rentar bodega"}
+                            {isSubmitting
+                              ? "Procesando..."
+                              : "Rentar bodega"}
                           </button>
                         </div>
                       </motion.div>
