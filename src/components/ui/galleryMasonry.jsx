@@ -6,13 +6,21 @@ const heightOptions = ["h-40", "h-52", "h-64", "h-80", "h-96"];
 
 export default function GalleryMasonry() {
   const navigate = useNavigate();
-  const { data: almacenes, fetchData } = useCRUD(`${import.meta.env.VITE_API_URL}/warehouses`);
+
+  // ⛔ autoFetch desactivado para evitar el ciclo
+  const { data: almacenes, fetchData } = useCRUD(
+    `${import.meta.env.VITE_API_URL}/warehouses`,
+    {},
+    false
+  );
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData(); // ✅ solo se ejecuta 1 vez al montar
+  }, []); // no incluyas `fetchData` en deps
 
-  const bodegasDisponibles = almacenes?.filter(bodega => bodega.status === "available");
+  const bodegasDisponibles = almacenes?.filter(
+    (bodega) => bodega.status === "available"
+  );
 
   return (
     <div className="p-6 min-h-screen">
@@ -31,8 +39,12 @@ export default function GalleryMasonry() {
               }`}
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-              <p className="text-white font-semibold">📍 {img.Site?.name || "Ubicación desconocida"}</p>
-              <p className="text-white text-sm">💰 ${img.monthly_price} /mes</p>
+              <p className="text-white font-semibold">
+                📍 {img.Site?.name || "Ubicación desconocida"}
+              </p>
+              <p className="text-white text-sm">
+                💰 ${img.monthly_price} /mes
+              </p>
             </div>
           </div>
         ))}

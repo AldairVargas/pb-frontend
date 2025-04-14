@@ -2,32 +2,48 @@ import React, { useEffect, useState, useRef } from "react";
 import { jwtDecode } from "jwt-decode";
 import useCRUD from "../../hooks/useCRUD";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const MisReservas = () => {
   const [rentas, setRentas] = useState([]);
+  const [bodegas, setBodegas] = useState({});
   const [loading, setLoading] = useState(true);
-  const fetchedRef = useRef(false); // <- Para evitar re-render infinitos
-  const { readItem } = useCRUD();
+  const fetchedRef = useRef(false);
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+
+  const { readItem } = useCRUD("", {
+    Authorization: `Bearer ${token}`,
+  });
 
   useEffect(() => {
     const fetchRentas = async () => {
-      if (fetchedRef.current) return; // ✅ evita llamadas duplicadas
+      if (fetchedRef.current) return;
       fetchedRef.current = true;
 
+      if (!token) {
+        toast.error("No tienes sesión activa");
+        setLoading(false);
+        return;
+      }
+
       try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
         const { id: userId } = jwtDecode(token);
-
-        const data = await readItem(`${import.meta.env.VITE_API_URL}/rents`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const data = await readItem(`${import.meta.env.VITE_API_URL}/rents`);
 
         const rentasDelUsuario = data.filter((r) => r.user_id === userId);
         setRentas(rentasDelUsuario);
+
+        const bodegaData = {};
+        await Promise.all(
+          rentasDelUsuario.map(async (renta) => {
+            const bodega = await readItem(
+              `${import.meta.env.VITE_API_URL}/warehouses/${renta.warehouse_id}`
+            );
+            bodegaData[renta.warehouse_id] = bodega;
+          })
+        );
+        setBodegas(bodegaData);
       } catch (error) {
         console.error("Error al obtener rentas:", error);
         toast.error("No se pudieron cargar tus reservas");
@@ -37,7 +53,7 @@ const MisReservas = () => {
     };
 
     fetchRentas();
-  }, [readItem]);
+  }, [readItem, token]);
 
   if (loading) {
     return (
@@ -56,41 +72,53 @@ const MisReservas = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {rentas.map((renta) => (
-        <div key={renta.rent_id} className="bg-white rounded-lg shadow overflow-hidden">
-          <img
-            src={`data:image/jpeg;base64,${renta.warehouse?.photo1}`}
-            alt="Foto de bodega"
-            className="w-full h-48 object-cover"
-          />
-          <div className="p-4">
-            <h3 className="text-lg font-semibold text-blue-600 mb-1">
-              Bodega {renta.warehouse?.code}
-            </h3>
-            <p className="text-gray-700">
-              Ubicación: {renta.warehouse?.Site?.name}
-            </p>
-            <p className="text-gray-700">
-              Precio mensual: ${renta.warehouse?.monthly_price}
-            </p>
-            <p className="text-gray-700">
-              Estado:{" "}
-              <span
-                className={`font-medium ${
-                  renta.warehouse?.status === "available"
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
-              >
-                {renta.warehouse?.status === "available"
-                  ? "Disponible"
-                  : "Ocupada"}
-              </span>
-            </p>
+    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {rentas.map((renta) => {
+        const bodega = bodegas[renta.warehouse_id];
+        if (!bodega) return null;
+
+        const inicio = new Date(renta.start_date).toLocaleDateString("es-MX");
+        const fin = new Date(renta.expiration_date).toLocaleDateString("es-MX");
+
+        return (
+          <div
+            key={renta.rent_id}
+            onClick={() => navigate(`/warehouse/${bodega.warehouse_id}`)}
+            className="cursor-pointer bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden group"
+          >
+            <img
+              src={`data:image/jpeg;base64,${bodega.photo1}`}
+              alt="Bodega"
+              className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+            <div className="p-4 space-y-1">
+              <h3 className="text-lg font-bold text-blue-600">
+                Bodega {bodega.code}
+              </h3>
+              <p className="text-sm text-gray-500">
+                📍 {bodega.Site?.name || "Ubicación desconocida"}
+              </p>
+              <p className="text-sm text-gray-500">
+                📦 {bodega.dimensions || "Tamaño no especificado"}
+              </p>
+              <p className="text-sm text-gray-500">
+                💰 ${bodega.monthly_price} / mes
+              </p>
+              <p className="text-sm text-gray-500">
+                📅 Inicio: {inicio}
+              </p>
+              <p className="text-sm text-gray-500">
+                ⏳ Fin: {fin}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-1 text-xs text-gray-700">
+                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                  Renta activa
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

@@ -1,14 +1,16 @@
 import React from "react";
 import { MapPin } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const CardWarehouse = ({ data = [] }) => {
-  const handleReservationClick = () => {
-    const token = localStorage.getItem('token');
+  const navigate = useNavigate();
+
+  const handleReservationClick = (warehouseId) => {
+    const token = localStorage.getItem("token");
     if (token) {
-      window.location.href = `/warehouse/details`;
+      navigate(`/warehouse/${warehouseId}`);
     } else {
-      window.location.href = '/auth';
+      navigate("/auth");
     }
   };
 
@@ -54,11 +56,12 @@ const CardWarehouse = ({ data = [] }) => {
                 ))}
               </div>
 
-              <Link to="#" onClick={() => handleReservationClick(warehouse.id)}>
-                <button className="w-full mt-4 px-4 py-2 text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700">
-                  Reservar ahora
-                </button>
-              </Link>
+              <button
+                onClick={() => handleReservationClick(warehouse.id)}
+                className="w-full mt-4 px-4 py-2 text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700"
+              >
+                Reservar ahora
+              </button>
             </div>
           </div>
         ))}
