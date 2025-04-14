@@ -8,16 +8,21 @@ import useCRUD from "../../hooks/useCRUD";
 import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext";
 
+
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Email inválido").required("Email es requerido"),
   password: Yup.string()
     .min(6, "La contraseña debe tener al menos 6 caracteres")
     .required("Contraseña es requerida"),
-  remember: Yup.boolean(),
 });
 
 const MyLogin = ({ onSwitchForm }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const [step, setStep] = useState(null); // 'email' | 'code' | 'password'
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [recoveryToken, setRecoveryToken] = useState("");
   const { saveData } = useCRUD();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,7 +36,7 @@ const MyLogin = ({ onSwitchForm }) => {
         values
       );
 
-      if (response && response.token) {
+      if (response?.token) {
         const userRole = response.user.Role.role_name;
         const userData = {
           id: response.user.id,
@@ -43,16 +48,13 @@ const MyLogin = ({ onSwitchForm }) => {
         };
         login(response.token, userRole, userData);
         toast.success("¡Bienvenido!");
-
-        // Redirigir basado en el rol y la ubicación anterior
-        const from = location.state?.from?.pathname || "/";
-        if (userRole === "Admin") {
-          navigate("/dashboard");
-        } else if (userRole === "SuperAdmin") {
-          navigate("/admin");
-        } else {
-          navigate('/cliente');
-        }
+        navigate(
+          userRole === "Admin"
+            ? "/dashboard"
+            : userRole === "SuperAdmin"
+            ? "/admin"
+            : "/cliente"
+        );
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Error al iniciar sesión");
@@ -61,17 +63,60 @@ const MyLogin = ({ onSwitchForm }) => {
     }
   };
 
+  const sendRecoveryCode = async () => {
+    try {
+      const response = await saveData(
+        `${import.meta.env.VITE_API_URL}/auth/send-code`,
+        "POST",
+        { email: recoveryEmail }
+      );
+
+      const receivedToken = response.token;
+      if (!receivedToken) throw new Error("Token no recibido del servidor");
+
+      setRecoveryToken(receivedToken);
+      toast.success("Código enviado al correo");
+      setStep("code");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error al enviar el código");
+    }
+  };
+
+  const verifyCodeAndReset = async () => {
+    try {
+      await saveData(
+        `${import.meta.env.VITE_API_URL}/auth/reset-password`,
+        "POST",
+        {
+          token: recoveryToken,
+          code: verificationCode,
+          password: newPassword,
+        }
+      );
+
+      toast.success("Contraseña restablecida");
+      setStep(null);
+      setRecoveryEmail("");
+      setVerificationCode("");
+      setNewPassword("");
+      setRecoveryToken("");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Error al restablecer contraseña"
+      );
+    }
+  };
+
   return (
     <div className="w-full min-h-screen bg-image flex items-center justify-center px-4 sm:px-6 md:px-12">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Left side - Hero content */}
           <div className="flex-col items-start justify-center hidden md:flex">
             <div className="flex flex-row items-center justify-center text-white space-x-3 mb-18">
-              <Link to={"/"}>
+              <Link to="/">
                 <Warehouse className="w-8 md:w-12 h-8 md:h-12" />
               </Link>
-              <Link to={"/"}>
+              <Link to="/">
                 <h1 className="text-2xl md:text-4xl text-white text-center">
                   BodegaSegura
                 </h1>
@@ -91,10 +136,8 @@ const MyLogin = ({ onSwitchForm }) => {
             </p>
           </div>
 
-          {/* Right side - Login form */}
           <div className="flex justify-center items-center w-full">
             <div className="flex flex-col w-full max-w-md bg-white rounded-lg p-4 md:p-8 shadow-md">
-              {/* Logo for mobile */}
               <div className="flex md:hidden flex-row items-center justify-center text-black space-x-3 mb-8">
                 <Warehouse className="w-8 h-8" />
                 <h1 className="text-2xl text-center">BodegaSegura</h1>
@@ -107,17 +150,12 @@ const MyLogin = ({ onSwitchForm }) => {
 
               <div className="mt-8">
                 <Formik
-                  initialValues={{
-                    email: "",
-                    password: "",
-                    remember: false,
-                  }}
+                  initialValues={{ email: "", password: "" }}
                   validationSchema={LoginSchema}
                   onSubmit={handleSubmit}
                 >
                   {({ errors, touched, isSubmitting }) => (
                     <Form className="w-full space-y-6">
-                      {/* Email */}
                       <div className="relative z-0 w-full mb-8 group">
                         <Field
                           type="email"
@@ -136,7 +174,6 @@ const MyLogin = ({ onSwitchForm }) => {
                         >
                           Correo Electrónico
                         </label>
-
                         {errors.email && touched.email && (
                           <div className="absolute top-full left-0 mt-1 w-max max-w-xs bg-red-500 text-white text-xs px-3 py-1 rounded-md shadow-lg whitespace-normal z-10">
                             {errors.email}
@@ -145,16 +182,15 @@ const MyLogin = ({ onSwitchForm }) => {
                         )}
                       </div>
 
-                      {/* Password */}
                       <div className="relative z-0 w-full mb-5 group">
                         <Field
                           type={showPassword ? "text" : "password"}
                           name="password"
                           id="floating_password"
-                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black peer ${
+                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 peer ${
                             errors.password && touched.password
-                              ? "border-red-500 pr-20"
-                              : "pr-10 border-gray-300"
+                              ? "border-red-500 pr-10"
+                              : "border-gray-300"
                           }`}
                           placeholder=" "
                         />
@@ -165,34 +201,33 @@ const MyLogin = ({ onSwitchForm }) => {
                           Contraseña
                         </label>
 
-                        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                          <button
-                            type="button"
-                            className="text-gray-500 focus:outline-none relative group"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? <EyeClosed /> : <Eye />}
-                            {errors.password && touched.password && (
-                              <div className="absolute -top-12 right-0 w-max max-w-[200px] bg-red-500 text-white text-xs px-3 py-1 rounded-md shadow-lg whitespace-normal group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                {errors.password}
-                                <div className="absolute bottom-[-6px] right-2 w-3 h-3 bg-red-500 transform rotate-45"></div>
-                              </div>
-                            )}
-                          </button>
+                        {/* Botón del icono */}
+                        <div
+                          className="absolute right-4 top-2.5 cursor-pointer"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeClosed /> : <Eye />}
                         </div>
+
+                        {/* Tooltip de error */}
+                        {errors.password && touched.password && (
+                          <div className="absolute top-full left-0 mt-1 w-max max-w-xs bg-red-500 text-white text-xs px-3 py-1 rounded-md shadow-lg whitespace-normal z-10">
+                            {errors.password}
+                            <div className="absolute -top-1 left-2 w-3 h-3 bg-red-500 transform rotate-45 z-[-1]" />
+                          </div>
+                        )}
                       </div>
 
-                      {/* Remember me & Forgot Password */}
                       <div className="flex flex-row items-center mb-3">
-                        <Link
-                          to="/"
+                        <button
+                          type="button"
+                          onClick={() => setStep("email")}
                           className="ml-auto text-sm text-black hover:text-gray-500"
                         >
-                          Forgot password?
-                        </Link>
+                          ¿Olvidaste tu contraseña?
+                        </button>
                       </div>
 
-                      {/* Botón CONTINUAR */}
                       <button
                         type="submit"
                         disabled={isSubmitting}
@@ -201,7 +236,6 @@ const MyLogin = ({ onSwitchForm }) => {
                         {isSubmitting ? "Procesando..." : "CONTINUAR"}
                       </button>
 
-                      {/* Registration link */}
                       <p className="text-center mt-4 text-sm">
                         ¿No tienes una cuenta?{" "}
                         <button
@@ -220,8 +254,93 @@ const MyLogin = ({ onSwitchForm }) => {
           </div>
         </div>
       </div>
+
+      {/* Modales de recuperación */}
+      {step === "email" && (
+        <Modal onClose={() => setStep(null)} title="Recuperar contraseña">
+          <input
+            type="email"
+            placeholder="Correo electrónico"
+            value={recoveryEmail}
+            onChange={(e) => setRecoveryEmail(e.target.value)}
+            className="input w-full mb-4 border border-gray-300 rounded px-3 py-2"
+          />
+          <button
+            className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+            onClick={sendRecoveryCode}
+          >
+            Enviar código
+          </button>
+        </Modal>
+      )}
+
+      {step === "code" && (
+        <Modal onClose={() => setStep(null)} title="Verificar código">
+          <input
+            type="text"
+            placeholder="Código recibido"
+            value={verificationCode}
+            onChange={(e) => setVerificationCode(e.target.value)}
+            className="input w-full mb-4 border border-gray-300 rounded px-3 py-2"
+          />
+          <button
+            className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+            onClick={() => setStep("password")}
+          >
+            Verificar
+          </button>
+        </Modal>
+      )}
+
+{step === "password" && (
+  <Modal onClose={() => setStep(null)} title="Nueva contraseña">
+    <div className="relative mb-4">
+      <input
+        type={showPassword ? "text" : "password"}
+        placeholder="Nueva contraseña"
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.target.value)}
+        className="input w-full border border-gray-300 rounded px-3 py-2 pr-10"
+      />
+      <div
+        className="absolute right-3 top-2.5 cursor-pointer"
+        onClick={() => setShowPassword(!showPassword)}
+      >
+        {showPassword ? <EyeClosed size={18} /> : <Eye size={18} />}
+      </div>
+    </div>
+    <button
+      className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+      onClick={verifyCodeAndReset}
+    >
+      Cambiar contraseña
+    </button>
+  </Modal>
+)}
     </div>
   );
 };
+
+const Modal = ({ title, children, onClose }) => (
+  <>
+    <div className="fixed inset-0 bg-black/50 z-40"></div>
+    <div className="fixed z-50 inset-0 flex items-center justify-center px-4">
+      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <h2 className="text-lg font-semibold mb-4 text-center border-b pb-2">
+          {title}
+        </h2>
+        {children}
+        <div className="mt-4 text-center">
+          <button
+            onClick={onClose}
+            className="text-sm text-gray-500 hover:underline"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  </>
+);
 
 export default MyLogin;
