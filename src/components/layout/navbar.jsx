@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Warehouse, Menu, X, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { motion } from "framer-motion";
 
 const MyNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -111,7 +112,7 @@ const MyNavbar = () => {
               </Link>
               {isAuthenticated() && user ? (
                 <Link
-                  to="/profile"
+                  to="/cliente"
                   className="flex items-center justify-center gap-2 text-sm text-gray-700 transition-colors hover:text-blue-600"
                   onClick={() => setIsOpen(false)}
                 >
