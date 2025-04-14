@@ -69,7 +69,7 @@ const MyNavbar = () => {
 
             {isAuthenticated() && user ? (
               <Link
-                to="/profile"
+                to="/cliente"
                 className={`flex items-center gap-2 text-sm transition-colors hover:text-blue-600 ${textColor}`}
               >
                 <User className="w-4 h-4" />

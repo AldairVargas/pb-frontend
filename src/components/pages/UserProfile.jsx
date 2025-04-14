@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { User, CreditCard, Settings, LogOut, Edit2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import useCRUD from '../../hooks/useCRUD';
 import { jwtDecode } from 'jwt-decode';
 import { toast } from 'react-toastify';
 
 const UserProfile = () => {
-  const { user, logout, loading } = useAuth();
-  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [userData, setUserData] = useState(null);
-  const { readItem, saveData, loading: loadingData } = useCRUD();
   const userIdRef = useRef(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -25,44 +21,52 @@ const UserProfile = () => {
     const fetchUserData = async () => {
       const token = localStorage.getItem('token');
       if (!token) return;
-
+  
       try {
         const decodedToken = jwtDecode(token);
         const userId = decodedToken.id;
-
-        if (userIdRef.current !== userId) {
-          userIdRef.current = userId;
-          const data = await readItem(`${import.meta.env.VITE_API_URL}/users/${userId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-
-          if (data) {
-            setUserData(data);
-            setFormData({
-              first_name: data.first_name || '',
-              last_name: data.last_name || '',
-              email: data.email || '',
-              phone: data.phone || ''
-            });
+        const role = decodedToken.role;
+        console.log('ID del usuario:', userId);
+        console.log('Rol del usuario:', role);
+  
+        userIdRef.current = userId;
+  
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
           }
+        });
+  
+        console.log("Status de respuesta:", response.status);
+  
+        if (!response.ok) {
+          const errMsg = await response.text();
+          throw new Error(`Error ${response.status}: ${errMsg}`);
+        }
+  
+        const data = await response.json();
+        console.log('Datos del usuario (fetch):', data);
+  
+        if (data) {
+          setUserData(data);
+          setFormData({
+            first_name: data.first_name || '',
+            last_name: data.last_name || '',
+            email: data.email || '',
+            phone: data.phone || ''
+          });
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error en fetchUserData:', error);
         toast.error('Error al cargar los datos del usuario');
       }
     };
-
+  
     fetchUserData();
-  }, [readItem]);
+  }, []);
+  
 
-  // Redirección fuera del render para evitar el error
-  useEffect(() => {
-    if (!user || !userData) {
-      navigate('/');
-    }
-  }, [user, userData, navigate]);
-
-  if (loading || loadingData || !user || !userData) {
+  if (!userData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -89,30 +93,32 @@ const UserProfile = () => {
   const handleSubmit = async () => {
     const token = localStorage.getItem('token');
     if (!token || !userData) return;
-
+  
     try {
-      const response = await saveData(
-        `${import.meta.env.VITE_API_URL}/users/${userIdRef.current}`,
-        'PUT',
-        formData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      if (response) {
-        setUserData(response);
-        setIsEditing(false);
-        toast.success('Perfil actualizado exitosamente');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${userIdRef.current}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+  
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Error ${response.status}: ${errText}`);
       }
+  
+      const updatedData = await response.json();
+      setUserData(updatedData);
+      setIsEditing(false);
+      toast.success('Perfil actualizado exitosamente');
     } catch (error) {
-      console.error('Error:', error);
-      toast.error(error.response?.data?.message || 'Error al actualizar el perfil');
+      console.error('Error al actualizar:', error);
+      toast.error('Error al actualizar el perfil');
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
