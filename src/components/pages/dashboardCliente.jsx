@@ -1,6 +1,7 @@
 import React from "react";
 import SidebarCliente from "../layout/sidebarCliente";
 import MisReservas from "./MisReservas";
+import UserProfile from "./UserProfile";
 
 const DashboardCliente = () => {
   return (
@@ -26,6 +27,14 @@ const DashboardCliente = () => {
             Mis Reservas
           </h2>
           <MisReservas />
+        </section>
+
+        {/* Informacion personal del cliente */}
+        <section id="informacion" className="px-6 pt-2 pb-6">
+          <h2 className="text-2xl font-semibold text-blue-500 mb-4">
+            Información Personal
+          </h2>
+          <UserProfile />
         </section>
       </main>
     </div>

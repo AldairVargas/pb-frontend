@@ -86,7 +86,7 @@ const useCRUD = (initialUrl, initialHeaders = {}) => {
       return response.data;
     } catch (err) {
       setError(err);
-      return null;
+      throw err;
     } finally {
       setLoading(false);
     }
