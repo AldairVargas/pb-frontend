@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from "react";
-import {
-  Home,
-  Warehouse,
-  LogOut,
-  Menu,
-  X,
-  User,
-} from "lucide-react";
+import { Home, Warehouse, LogOut, Menu, X, User } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const SidebarCliente = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,10 +41,13 @@ const SidebarCliente = () => {
     <>
       {/* NAVBAR móvil */}
       <div className="md:hidden flex items-center justify-between p-4 bg-white shadow fixed top-0 left-0 right-0 z-50 h-16">
-        <div className="flex items-center space-x-2">
-          <Warehouse className="w-6 h-6 text-blue-600" />
-          <h2 className="text-lg font-bold text-blue-600">Bodega Segura</h2>
-        </div>
+        <Link to={"/"}>
+          <div className="flex items-center space-x-2">
+            <Warehouse className="w-6 h-6 text-blue-600" />
+            <h2 className="text-lg font-bold text-blue-600">Bodega Segura</h2>
+          </div>
+        </Link>
+
         <button id="menu-button" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? (
             <X className="w-6 h-6 text-blue-600" />
@@ -62,12 +59,15 @@ const SidebarCliente = () => {
 
       {/* SIDEBAR escritorio */}
       <div className="hidden md:flex flex-col min-h-screen w-64 bg-white shadow-md px-4 py-6 border-r border-gray-200">
-        <div className="flex items-center justify-center mb-8 space-x-2">
-          <div className="bg-blue-100 p-2 rounded-full shadow-sm">
-            <Warehouse className="w-6 h-6 text-blue-600" />
+        <Link to={"/"}>
+          <div className="flex items-center justify-center mb-8 space-x-2">
+            <div className="bg-blue-100 p-2 rounded-full shadow-sm">
+              <Warehouse className="w-6 h-6 text-blue-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-blue-600">Bodega Segura</h2>
           </div>
-          <h2 className="text-2xl font-bold text-blue-600">Bodega Segura</h2>
-        </div>
+        </Link>
+
         <NavLinks onClick={null} handleLogout={handleLogout} />
       </div>
 
@@ -86,7 +86,10 @@ const SidebarCliente = () => {
               <Warehouse className="w-6 h-6 text-blue-600" />
               <h2 className="text-xl font-bold text-blue-600">Bodega Segura</h2>
             </div>
-            <NavLinks onClick={() => setIsOpen(false)} handleLogout={handleLogout} />
+            <NavLinks
+              onClick={() => setIsOpen(false)}
+              handleLogout={handleLogout}
+            />
           </motion.div>
         )}
       </AnimatePresence>
