@@ -121,133 +121,129 @@ const UserProfile = () => {
   
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="bg-blue-600 px-6 py-4">
-            <h1 className="text-2xl font-bold text-white">Mi Perfil</h1>
+    <div className="min-h-screen bg-gray-50 py-8 px-6">
+      <h1 className="text-3xl font-bold text-gray-800 mb-10 flex items-center gap-2">
+        <User className="w-7 h-7 text-blue-600" />
+        Información Personal
+      </h1>
+  
+      {/* DATOS PERSONALES */}
+      <section className="mb-12 pl-4 border-l-4 border-blue-600">
+        <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2">
+          <User className="w-5 h-5 text-blue-600" />
+          Datos del Usuario
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+          <div>
+            <label className="block text-sm text-gray-500 mb-1">Nombre</label>
+            <input
+              type="text"
+              name="first_name"
+              className="w-full border-b-2 border-gray-300 bg-transparent px-1 py-1 text-gray-900 focus:outline-none focus:border-blue-500"
+              value={formData.first_name}
+              onChange={handleInputChange}
+              readOnly={!isEditing}
+            />
           </div>
-
-          <div className="p-6">
-            <section className="mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <User className="w-5 h-5 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-800">Información Personal</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                  <input
-                    type="text"
-                    name="first_name"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    value={formData.first_name}
-                    onChange={handleInputChange}
-                    readOnly={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
-                  <input
-                    type="text"
-                    name="last_name"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    value={formData.last_name}
-                    onChange={handleInputChange}
-                    readOnly={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    readOnly={!isEditing}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    readOnly={!isEditing}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <CreditCard className="w-5 h-5 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-800">Métodos de Pago</h2>
-              </div>
-              <p className="text-gray-600 mb-4">La integración con métodos de pago estará disponible próximamente.</p>
-              <button
-                disabled
-                className="px-4 py-2 bg-gray-100 text-gray-500 rounded-md cursor-not-allowed"
-              >
-                Agregar método de pago
-              </button>
-            </section>
-
-            <section className="mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <Settings className="w-5 h-5 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-800">Configuración</h2>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Cambiar Contraseña</label>
-                  <button className="px-4 py-2 text-sm text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors">
-                    Actualizar contraseña
-                  </button>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Notificaciones</label>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <span className="ml-2 text-sm text-gray-600">Recibir notificaciones por email</span>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
-              {isEditing ? (
-                <button
-                  onClick={handleSubmit}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                >
-                  Guardar Cambios
-                </button>
-              ) : (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                >
-                  <Edit2 className="w-4 h-4" />
-                  Editar Información
-                </button>
-              )}
-              <button
-                onClick={handleLogout}
-                className="px-6 py-2 text-red-600 border border-red-600 rounded-md hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
-              >
-                <LogOut className="w-4 h-4" />
-                Cerrar Sesión
-              </button>
-            </div>
+          <div>
+            <label className="block text-sm text-gray-500 mb-1">Apellido</label>
+            <input
+              type="text"
+              name="last_name"
+              className="w-full border-b-2 border-gray-300 bg-transparent px-1 py-1 text-gray-900 focus:outline-none focus:border-blue-500"
+              value={formData.last_name}
+              onChange={handleInputChange}
+              readOnly={!isEditing}
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-500 mb-1">Email</label>
+            <input
+              type="email"
+              name="email"
+              className="w-full border-b-2 border-gray-300 bg-transparent px-1 py-1 text-gray-900 focus:outline-none focus:border-blue-500"
+              value={formData.email}
+              onChange={handleInputChange}
+              readOnly={!isEditing}
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-500 mb-1">Teléfono</label>
+            <input
+              type="tel"
+              name="phone"
+              className="w-full border-b-2 border-gray-300 bg-transparent px-1 py-1 text-gray-900 focus:outline-none focus:border-blue-500"
+              value={formData.phone}
+              onChange={handleInputChange}
+              readOnly={!isEditing}
+            />
           </div>
         </div>
+      </section>
+  
+      {/* MÉTODOS DE PAGO */}
+      <section className="mb-12 pl-4 border-l-4 border-yellow-500">
+        <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2">
+          <CreditCard className="w-5 h-5 text-yellow-500" />
+          Métodos de Pago
+        </h2>
+        <p className="text-gray-500 mb-2">La integración estará disponible próximamente.</p>
+        <button
+          disabled
+          className="px-4 py-2 bg-gray-200 text-gray-400 rounded-md cursor-not-allowed"
+        >
+          Agregar método de pago
+        </button>
+      </section>
+  
+      {/* CONFIGURACIÓN */}
+      <section className="mb-12 pl-4 border-l-4 border-gray-500">
+        <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2">
+          <Settings className="w-5 h-5 text-gray-500" />
+          Configuración
+        </h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Cambiar Contraseña</label>
+            <button className="px-4 py-2 text-sm text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors">
+              Actualizar contraseña
+            </button>
+          </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <span className="ml-2 text-sm text-gray-600">Recibir notificaciones por email</span>
+          </div>
+        </div>
+      </section>
+  
+      {/* ACCIONES */}
+      <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+        {isEditing ? (
+          <button
+            onClick={handleSubmit}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+          >
+            Guardar Cambios
+          </button>
+        ) : (
+          <button
+            onClick={() => setIsEditing(true)}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+          >
+            <Edit2 className="w-4 h-4" />
+            Editar Información
+          </button>
+        )}
+        <button
+          onClick={handleLogout}
+          className="px-6 py-2 text-red-600 border border-red-600 rounded-md hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
+        >
+          <LogOut className="w-4 h-4" />
+          Cerrar Sesión
+        </button>
       </div>
     </div>
   );
