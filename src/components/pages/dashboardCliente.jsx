@@ -31,9 +31,6 @@ const DashboardCliente = () => {
 
         {/* Informacion personal del cliente */}
         <section id="informacion" className="px-6 pt-2 pb-6">
-          <h2 className="text-2xl font-semibold text-blue-500 mb-4">
-            Información Personal
-          </h2>
           <UserProfile />
         </section>
       </main>
