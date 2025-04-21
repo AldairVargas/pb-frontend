@@ -29,7 +29,6 @@ export default function ModalRent({ isOpen, onClose, userId, warehouseId }) {
       .required("Fecha de expiración requerida")
       .matches(/^(0[1-9]|1[0-2])\d{2}$/, "Formato inválido. Usa MMYY")
       .length(4, "Debe tener exactamente 4 dígitos"),
-
     cvv: Yup.string()
       .required("CVV requerido")
       .matches(/^\d{3}$/, "Debe contener exactamente 3 dígitos"),
@@ -47,21 +46,53 @@ export default function ModalRent({ isOpen, onClose, userId, warehouseId }) {
         warehouse_id: values.warehouse_id,
       };
 
-      await axios.post(`${import.meta.env.VITE_API_URL}/rents`, rentData, {
+      // 1. Crear la renta
+      const rentResponse = await axios.post(
+        `${import.meta.env.VITE_API_URL}/rents`,
+        rentData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Respuesta de creación de renta:", rentResponse.data);
+
+      const createdRent = rentResponse.data;
+
+      // Detectar ID de forma segura
+      const rentId =
+        createdRent?.id ||
+        createdRent?.rent_id ||
+        createdRent?.data?.id ||
+        createdRent?.data?.rent_id;
+
+      if (!rentId) {
+        throw new Error("No se pudo obtener el ID de la renta creada.");
+      }
+
+      // 2. Enviar el pago
+      const paymentData = {
+        rent_id: rentId,
+        payment_method_id: "pm_card_visa",
+      };
+
+      await axios.post(`${import.meta.env.VITE_API_URL}/payments`, paymentData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      toast.success("Renta creada exitosamente");
+      toast.success("Renta y pago realizados exitosamente");
       onClose();
 
       setTimeout(() => {
         window.location.reload();
       }, 500);
     } catch (error) {
-      console.error("Error creando renta:", error);
-      toast.error("Error al crear la renta");
+      console.error("Error al crear la renta o procesar el pago:", error);
+      toast.error("Error al procesar la renta o el pago");
     } finally {
       setSubmitting(false);
     }
