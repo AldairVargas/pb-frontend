@@ -46,7 +46,6 @@ export default function ModalRent({ isOpen, onClose, userId, warehouseId }) {
         warehouse_id: values.warehouse_id,
       };
 
-      // 1. Crear la renta
       const rentResponse = await axios.post(
         `${import.meta.env.VITE_API_URL}/rents`,
         rentData,
@@ -57,22 +56,15 @@ export default function ModalRent({ isOpen, onClose, userId, warehouseId }) {
         }
       );
 
-      console.log("Respuesta de creación de renta:", rentResponse.data);
-
       const createdRent = rentResponse.data;
-
-      // Detectar ID de forma segura
       const rentId =
         createdRent?.id ||
         createdRent?.rent_id ||
         createdRent?.data?.id ||
         createdRent?.data?.rent_id;
 
-      if (!rentId) {
-        throw new Error("No se pudo obtener el ID de la renta creada.");
-      }
+      if (!rentId) throw new Error("No se pudo obtener el ID de la renta creada.");
 
-      // 2. Enviar el pago
       const paymentData = {
         rent_id: rentId,
         payment_method_id: "pm_card_visa",
@@ -99,13 +91,7 @@ export default function ModalRent({ isOpen, onClose, userId, warehouseId }) {
   };
 
   const onlyNumbers = (e) => {
-    const allowedKeys = [
-      "Backspace",
-      "Delete",
-      "ArrowLeft",
-      "ArrowRight",
-      "Tab",
-    ];
+    const allowedKeys = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"];
     if (!/[0-9]/.test(e.key) && !allowedKeys.includes(e.key)) {
       e.preventDefault();
     }
@@ -136,6 +122,42 @@ export default function ModalRent({ isOpen, onClose, userId, warehouseId }) {
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>
+            </div>
+
+            {/* Steps visuales y clicables */}
+            <div className="px-6 pt-2">
+              <h2 className="sr-only">Steps</h2>
+              <ol className="grid grid-cols-2 divide-x divide-gray-100 overflow-hidden rounded-lg border border-gray-100 text-sm text-gray-500">
+                <li
+                  className={`cursor-pointer flex items-center justify-center gap-2 p-4 ${
+                    step === 1 ? "bg-gray-50 font-semibold" : ""
+                  }`}
+                  onClick={() => setStep(1)}
+                >
+                  <svg className="size-6 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2" />
+                  </svg>
+                  <p className="leading-none">
+                    <strong className="block">Fechas</strong>
+                    <small>Selecciona el periodo</small>
+                  </p>
+                </li>
+
+                <li
+                  className={`cursor-pointer flex items-center justify-center gap-2 p-4 ${
+                    step === 2 ? "bg-gray-50 font-semibold" : ""
+                  }`}
+                  onClick={() => setStep(2)}
+                >
+                  <svg className="size-6 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  <p className="leading-none">
+                    <strong className="block">Pago</strong>
+                    <small>Información de tarjeta</small>
+                  </p>
+                </li>
+              </ol>
             </div>
 
             <Formik
