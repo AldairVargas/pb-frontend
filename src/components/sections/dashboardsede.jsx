@@ -44,19 +44,7 @@ const DashboardSede = () => {
         value: libres,
         icon: <CheckCircle className="w-8 h-8 text-cyan-600" />,
         bg: "bg-cyan-50",
-      },
-      {
-        title: "Pagos Vencidos",
-        value: 0,
-        icon: <AlarmClock className="w-8 h-8 text-yellow-600" />,
-        bg: "bg-yellow-50",
-      },
-      {
-        title: "Desalojos Realizados",
-        value: 0,
-        icon: <Ban className="w-8 h-8 text-red-600" />,
-        bg: "bg-red-50",
-      },
+      }
     ];
   }, [bodegas]);
 
