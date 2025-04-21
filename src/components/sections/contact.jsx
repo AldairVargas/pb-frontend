@@ -1,5 +1,7 @@
 import React from "react";
 import { Phone, MapPin } from "lucide-react";
+import warehouseImg from "../../assets/images/warehouse.png";
+
 
 const escapeHTML = (str) => {
   return str.replace(/[&<>"']/g, (match) => {
@@ -67,89 +69,9 @@ const MyContact = () => {
           </div>
 
           {/* Formulario */}
-          <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200 w-full md:w-auto">
-            <h2 className="text-2xl font-bold mb-2 text-center md:text-left">Contáctanos</h2>
-            <p className="text-gray-500 mb-6 text-center md:text-left">
-              Completa el formulario y te responderemos a la brevedad.
-            </p>
+          <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-full md:w-auto">
+          <img src={warehouseImg} className="rounded-lg shadow-2xl" alt="warehouse" />
 
-            <form className="space-y-4" onSubmit={handleSecureSubmit}>
-              {/* Nombre y Apellido */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-semibold">Nombre</label>
-                  <input
-                    type="text"
-                    name="nombre"
-                    required
-                    maxLength={50}
-                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
-                    placeholder="Tu nombre"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold">Apellido</label>
-                  <input
-                    type="text"
-                    name="apellido"
-                    required
-                    maxLength={50}
-                    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
-                    placeholder="Tu apellido"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="text-sm font-semibold">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  required
-                  maxLength={100}
-                  placeholder="tu@email.com"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Teléfono */}
-              <div>
-                <label className="text-sm font-semibold">Teléfono</label>
-                <input
-                  type="tel"
-                  name="telefono"
-                  required
-                  maxLength={20}
-                  pattern="^[0-9\s+\-]{7,20}$"
-                  placeholder="Tu teléfono"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Mensaje */}
-              <div>
-                <label className="text-sm font-semibold">Mensaje</label>
-                <textarea
-                  name="mensaje"
-                  rows="4"
-                  required
-                  maxLength={500}
-                  placeholder="¿En qué podemos ayudarte?"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Botón */}
-              <button
-                type="submit"
-                className="w-full px-4 py-3 text-white bg-blue-600 rounded-lg shadow-md transition-all duration-300 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Enviar mensaje
-              </button>
-            </form>
           </div>
         </div>
       </div>
