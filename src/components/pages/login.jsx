@@ -15,23 +15,9 @@ const LoginSchema = Yup.object().shape({
     .required("Contraseña es requerida"),
 });
 
-const recoveryEmailSchema = Yup.object().shape({
-  email: Yup.string().email("Email inválido").required("Email requerido"),
-});
-
-const passwordResetSchema = Yup.object().shape({
-  password: Yup.string()
-    .required("Contraseña requerida")
-    .min(6, "Mínimo 6 caracteres")
-    .matches(/[A-Z]/, "Debe incluir una mayúscula")
-    .matches(/[a-z]/, "Debe incluir una minúscula")
-    .matches(/\d/, "Debe incluir un número")
-    .matches(/[@$!%*?&]/, "Debe incluir un carácter especial"),
-});
-
 const MyLogin = ({ onSwitchForm }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const [step, setStep] = useState(null);
+  const [step, setStep] = useState(null); // 'email' | 'code' | 'password'
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -140,7 +126,12 @@ const MyLogin = ({ onSwitchForm }) => {
             </h1>
             <p className="text-white font-semibold mt-10 opacity-100 text-sm md:text-base">
               En BodegaSegura entendemos la importancia de contar con un espacio
-              seguro para almacenar tus bienes...
+              seguro para almacenar tus bienes. Nuestras instalaciones cuentan
+              con vigilancia 24/7, acceso controlado y condiciones óptimas para
+              garantizar la seguridad de tus pertenencias. Ya sea para uso
+              personal o comercial, tenemos la solución de almacenamiento
+              perfecta para ti. Descubre la tranquilidad de saber que tus
+              objetos están protegidos en todo momento.
             </p>
           </div>
 
@@ -168,18 +159,25 @@ const MyLogin = ({ onSwitchForm }) => {
                         <Field
                           type="email"
                           name="email"
-                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 peer ${
+                          id="floating_email"
+                          className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black peer ${
                             errors.email && touched.email
                               ? "border-red-500 pr-10"
                               : "border-gray-300"
                           }`}
                           placeholder=" "
                         />
-                        <label htmlFor="email" className="form-label">
+                        <label
+                          htmlFor="floating_email"
+                          className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-7 scale-75 top-3 -z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-7"
+                        >
                           Correo Electrónico
                         </label>
                         {errors.email && touched.email && (
-                          <div className="text-sm text-red-500 mt-1">{errors.email}</div>
+                          <div className="absolute top-full left-0 mt-1 w-max max-w-xs bg-red-500 text-white text-xs px-3 py-1 rounded-md shadow-lg whitespace-normal z-10">
+                            {errors.email}
+                            <div className="absolute -top-1 left-2 w-3 h-3 bg-red-500 transform rotate-45 z-[-1]"></div>
+                          </div>
                         )}
                       </div>
 
@@ -187,6 +185,7 @@ const MyLogin = ({ onSwitchForm }) => {
                         <Field
                           type={showPassword ? "text" : "password"}
                           name="password"
+                          id="floating_password"
                           className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 peer ${
                             errors.password && touched.password
                               ? "border-red-500 pr-10"
@@ -194,17 +193,27 @@ const MyLogin = ({ onSwitchForm }) => {
                           }`}
                           placeholder=" "
                         />
-                        <label htmlFor="password" className="form-label">
+                        <label
+                          htmlFor="floating_password"
+                          className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-7 scale-75 top-3 -z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-7"
+                        >
                           Contraseña
                         </label>
+
+                        {/* Botón del icono */}
                         <div
                           className="absolute right-4 top-2.5 cursor-pointer"
                           onClick={() => setShowPassword(!showPassword)}
                         >
                           {showPassword ? <EyeClosed /> : <Eye />}
                         </div>
+
+                        {/* Tooltip de error */}
                         {errors.password && touched.password && (
-                          <div className="text-sm text-red-500 mt-1">{errors.password}</div>
+                          <div className="absolute top-full left-0 mt-1 w-max max-w-xs bg-red-500 text-white text-xs px-3 py-1 rounded-md shadow-lg whitespace-normal z-10">
+                            {errors.password}
+                            <div className="absolute -top-1 left-2 w-3 h-3 bg-red-500 transform rotate-45 z-[-1]" />
+                          </div>
                         )}
                       </div>
 
@@ -221,7 +230,7 @@ const MyLogin = ({ onSwitchForm }) => {
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="text-white bg-black hover:bg-gray-800 font-medium rounded-lg text-sm w-full px-5 py-4 text-center mt-6 disabled:opacity-50"
+                        className="text-white bg-black hover:bg-gray-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm w-full px-5 py-4 text-center mt-6 disabled:opacity-50"
                       >
                         {isSubmitting ? "Procesando..." : "CONTINUAR"}
                       </button>
@@ -245,12 +254,20 @@ const MyLogin = ({ onSwitchForm }) => {
         </div>
       </div>
 
-      {/* Modal: Recuperar contraseña */}
+      {/* Modales de recuperación */}
       {step === "email" && (
         <Modal onClose={() => setStep(null)} title="Recuperar contraseña">
           <Formik
-            initialValues={{ email: recoveryEmail }}
-            validationSchema={recoveryEmailSchema}
+            initialValues={{ email: "" }}
+            validationSchema={Yup.object({
+              email: Yup.string()
+                .email("Correo inválido")
+                .required("Correo es requerido")
+                .matches(
+                  /^[^\s@<>()[\]\\.,;:\s@"]+@[^\s@<>()[\]\\.,;:\s@"]+\.[^\s@<>()[\]\\.,;:\s@"]+$/,
+                  "Correo contiene caracteres no permitidos"
+                ),
+            })}
             onSubmit={(values) => {
               setRecoveryEmail(values.email);
               sendRecoveryCode();
@@ -265,7 +282,9 @@ const MyLogin = ({ onSwitchForm }) => {
                   className="input w-full mb-2 border border-gray-300 rounded px-3 py-2"
                 />
                 {errors.email && touched.email && (
-                  <div className="text-sm text-red-500 mb-2">{errors.email}</div>
+                  <div className="text-red-500 text-sm mb-2">
+                    {errors.email}
+                  </div>
                 )}
                 <button
                   type="submit"
@@ -279,7 +298,6 @@ const MyLogin = ({ onSwitchForm }) => {
         </Modal>
       )}
 
-      {/* Modal: Código */}
       {step === "code" && (
         <Modal onClose={() => setStep(null)} title="Verificar código">
           <input
@@ -298,12 +316,19 @@ const MyLogin = ({ onSwitchForm }) => {
         </Modal>
       )}
 
-      {/* Modal: Nueva contraseña */}
       {step === "password" && (
         <Modal onClose={() => setStep(null)} title="Nueva contraseña">
           <Formik
-            initialValues={{ password: newPassword }}
-            validationSchema={passwordResetSchema}
+            initialValues={{ password: "" }}
+            validationSchema={Yup.object({
+              password: Yup.string()
+                .required("Contraseña es requerida")
+                .min(6, "La contraseña debe tener al menos 6 caracteres")
+                .matches(
+                  /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+                  "Debe tener mayúscula, minúscula, número y carácter especial"
+                ),
+            })}
             onSubmit={(values) => {
               setNewPassword(values.password);
               verifyCodeAndReset();
@@ -325,7 +350,9 @@ const MyLogin = ({ onSwitchForm }) => {
                     {showPassword ? <EyeClosed size={18} /> : <Eye size={18} />}
                   </div>
                   {errors.password && touched.password && (
-                    <div className="text-sm text-red-500 mt-1">{errors.password}</div>
+                    <div className="text-red-500 text-sm mt-1">
+                      {errors.password}
+                    </div>
                   )}
                 </div>
                 <button
