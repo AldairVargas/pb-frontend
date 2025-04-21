@@ -16,7 +16,6 @@ const useCRUD = (initialUrl, initialHeaders = {}) => {
     if (status === 401) navigate("/401");
     else if (status === 403) navigate("/403");
     else if (status === 404) navigate("/404");
-    else if (status === 500) navigate("/500");
   };
 
   const fetchData = useCallback(async (additionalHeaders = {}) => {
