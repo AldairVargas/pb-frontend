@@ -9,7 +9,6 @@ import { toast } from "react-toastify";
 const validationSchema = Yup.object({
   email: Yup.string().email("Formato inválido").required("Requerido"),
   password: Yup.string()
-    .required("Requerido")
     .min(6, "Mínimo 6 caracteres")
     .matches(
       /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
@@ -33,34 +32,42 @@ const validationSchema = Yup.object({
 
 const UsuariosAdmin = () => {
   const token = localStorage.getItem("token");
+  const headers = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
 
-  const headers = useMemo(
-    () => ({ Authorization: `Bearer ${token}` }),
-    [token]
-  );
-
-  const {
-    data: usuarios,
-    fetchData,
-    saveData,
-  } = useCRUD(`${import.meta.env.VITE_API_URL}/users`, headers);
+  const { data: usuarios, fetchData, saveData } = useCRUD(`${import.meta.env.VITE_API_URL}/users`, headers);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const handleCreateUser = async (values, { resetForm, setSubmitting }) => {
+  const openCreateModal = () => {
+    setEditingUser(null);
+    setIsOpen(true);
+  };
+
+  const handleCreateOrEditUser = async (values, { resetForm, setSubmitting }) => {
     try {
-      const payload = { ...values, active: true };
-      await saveData(`${import.meta.env.VITE_API_URL}/users`, "POST", payload, headers);
-      toast.success("Usuario creado correctamente");
+      if (editingUser) {
+        const updated = { ...values };
+        if (!updated.password) delete updated.password;
+
+        await saveData(`${import.meta.env.VITE_API_URL}/users/${editingUser.user_id}`, "PUT", updated, headers);
+        toast.success("Usuario actualizado correctamente");
+      } else {
+        const payload = { ...values, active: true };
+        await saveData(`${import.meta.env.VITE_API_URL}/users`, "POST", payload, headers);
+        toast.success("Usuario creado correctamente");
+      }
+
       fetchData();
       setIsOpen(false);
+      setEditingUser(null);
       resetForm();
     } catch (error) {
-      toast.error("Error al crear el usuario");
+      toast.error("Error al guardar el usuario");
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -73,10 +80,9 @@ const UsuariosAdmin = () => {
       <div>
         <p>¿Seguro que deseas <strong>{newStatus ? "activar" : "desactivar"}</strong> este usuario?</p>
         <div className="mt-2 flex justify-end gap-3">
-          <button
-            className="text-sm text-gray-600 hover:underline"
-            onClick={() => toast.dismiss()}
-          >Cancelar</button>
+          <button className="text-sm text-gray-600 hover:underline" onClick={() => toast.dismiss()}>
+            Cancelar
+          </button>
           <button
             className={`text-sm font-semibold ${newStatus ? "text-green-600" : "text-red-600"} hover:underline`}
             onClick={async () => {
@@ -91,7 +97,9 @@ const UsuariosAdmin = () => {
                 console.error(err);
               }
             }}
-          >Confirmar</button>
+          >
+            Confirmar
+          </button>
         </div>
       </div>,
       {
@@ -109,7 +117,7 @@ const UsuariosAdmin = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-blue-600">Usuarios</h1>
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={openCreateModal}
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
         >
           <Plus className="w-4 h-4" /> Crear Usuario
@@ -134,11 +142,20 @@ const UsuariosAdmin = () => {
                 <td className="px-6 py-4">{user.email}</td>
                 <td className="px-6 py-4">{user.Role?.role_name}</td>
                 <td className="px-6 py-4">
-                  <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${user.active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{user.active ? "Activo" : "Inactivo"}</span>
+                  <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${user.active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                    {user.active ? "Activo" : "Inactivo"}
+                  </span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex justify-center gap-4">
-                    <button className="text-blue-600 hover:text-blue-800" title="Editar">
+                    <button
+                      className="text-blue-600 hover:text-blue-800"
+                      title="Editar"
+                      onClick={() => {
+                        setEditingUser(user);
+                        setIsOpen(true);
+                      }}
+                    >
                       <Pencil className="w-5 h-5" />
                     </button>
                     <button
@@ -156,62 +173,68 @@ const UsuariosAdmin = () => {
         </table>
       </div>
 
-      {/* Modal de creación */}
+      {/* Modal Crear / Editar */}
       <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-xl border border-gray-200">
             <div className="flex justify-between items-center mb-4">
-              <Dialog.Title className="text-xl font-semibold text-gray-800">Crear Usuario</Dialog.Title>
+              <Dialog.Title className="text-xl font-semibold text-gray-800">
+                {editingUser ? "Editar Usuario" : "Crear Usuario"}
+              </Dialog.Title>
               <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
+
             <Formik
               initialValues={{
-                email: "",
+                email: editingUser?.email || "",
                 password: "",
-                first_name: "",
-                last_name: "",
-                phone: "",
-                registration_date: new Date(),
-                role_id: "1",
+                first_name: editingUser?.first_name || "",
+                last_name: editingUser?.last_name || "",
+                phone: editingUser?.phone || "",
+                registration_date: editingUser?.registration_date || new Date(),
+                role_id: editingUser?.role_id?.toString() || "1",
               }}
               validationSchema={validationSchema}
-              onSubmit={handleCreateUser}
+              onSubmit={handleCreateOrEditUser}
+              enableReinitialize
             >
               {({ isSubmitting }) => (
                 <Form className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                      <Field name="first_name" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                      <Field name="first_name" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm" />
                       <ErrorMessage name="first_name" component="div" className="text-red-500 text-sm" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Apellido</label>
-                      <Field name="last_name" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                      <Field name="last_name" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm" />
                       <ErrorMessage name="last_name" component="div" className="text-red-500 text-sm" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Correo</label>
-                    <Field name="email" type="email" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                    <Field name="email" type="email" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm" />
                     <ErrorMessage name="email" component="div" className="text-red-500 text-sm" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Teléfono</label>
-                    <Field name="phone" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                    <Field name="phone" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm" />
                     <ErrorMessage name="phone" component="div" className="text-red-500 text-sm" />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Contraseña</label>
-                    <Field name="password" type="password" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
-                    <ErrorMessage name="password" component="div" className="text-red-500 text-sm" />
-                  </div>
+                  {!editingUser && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+                      <Field name="password" type="password" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm" />
+                      <ErrorMessage name="password" component="div" className="text-red-500 text-sm" />
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Rol</label>
-                    <Field as="select" name="role_id" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    <Field as="select" name="role_id" className="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm">
                       <option value="1">Admin</option>
                       <option value="2">User</option>
                       <option value="3">SuperAdmin</option>
