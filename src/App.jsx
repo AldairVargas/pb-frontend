@@ -13,6 +13,12 @@ import UserProfile from "./components/pages/UserProfile";
 import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from "./components/layout/PrivateRoute";
 
+// 🆕 Importar páginas de error
+import Error401 from "./components/pages/Error401";
+import Error403 from "./components/pages/Error403";
+import Error404 from "./components/pages/Error404";
+import Error500 from "./components/pages/Error500";
+
 // Create a wrapper component for the Navbar
 const NavbarWrapper = () => {
   const location = useLocation();
@@ -61,14 +67,21 @@ function App() {
               />
             }
           />
+          <Route
+            path="/cliente"
+            element={
+              <PrivateRoute
+                element={<DashboardCliente />}
+                allowedRoles={["User"]}
+              />
+            }
+          />
 
-          <Route path="/cliente"
-          element={
-            <PrivateRoute
-            element={<DashboardCliente />}
-            allowedRoles={["User"]}
-            />
-          }/>
+          {/* 🆕 Rutas de error */}
+          <Route path="/401" element={<Error401 />} />
+          <Route path="/403" element={<Error403 />} />
+          <Route path="/500" element={<Error500 />} />
+          <Route path="*" element={<Error404 />} />
         </Routes>
       </Router>
     </AuthProvider>

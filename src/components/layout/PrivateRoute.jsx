@@ -11,10 +11,12 @@ const PrivateRoute = ({ element, allowedRoles }) => {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
+  // ✅ Solo si user.role es una cadena (ej. "Admin", "User", "SuperAdmin")
   if (!allowedRoles.includes(user.role)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/403" replace />;
   }
 
   return element;
 };
+
 export default PrivateRoute;
