@@ -1,50 +1,174 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 
 const Error403 = () => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const iconVariants = {
+    hover: { rotate: 10, scale: 1.1 },
+    tap: { rotate: -10, scale: 0.95 },
+  };
+
   return (
     <motion.div
-      className="d-flex justify-content-center align-items-center"
       style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
         minHeight: "100vh",
-        background: "linear-gradient(to right, #f3f4f6, #e0e7ff)",
+        background: "linear-gradient(135deg, #f6f9fc 0%, #e3eaf1 100%)",
         padding: "20px",
+        position: "relative",
+        overflow: "hidden",
       }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
     >
+      {/* Estrellas flotantes */}
+      {[...Array(25)].map((_, i) => (
+        <motion.div
+          key={i}
+          style={{
+            position: "absolute",
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            width: "2px",
+            height: "2px",
+            backgroundColor: "#ccc",
+            borderRadius: "50%",
+            opacity: 0.6,
+          }}
+          animate={{ y: ["0%", "20%", "0%"] }}
+          transition={{
+            repeat: Infinity,
+            duration: 4 + Math.random() * 4,
+            delay: Math.random() * 2,
+          }}
+        />
+      ))}
+
       <motion.div
-        className="text-center bg-white shadow-lg p-5 rounded"
-        style={{ maxWidth: "520px" }}
-        initial={{ scale: 0.9 }}
-        animate={{ scale: 1 }}
+        style={{
+          textAlign: "center",
+          maxWidth: "520px",
+          padding: "50px",
+          background: "white",
+          borderRadius: "20px",
+          boxShadow: "0 12px 40px rgba(0, 0, 0, 0.1)",
+        }}
+        initial={{ y: -30 }}
+        animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 100 }}
       >
-        <div className="mb-4">
-          <motion.div
-            animate={{ rotate: [0, -5, 5, 0] }}
-            transition={{ repeat: Infinity, duration: 3 }}
-            style={{ fontSize: "60px", color: "#6c5ce7" }}
-          >
-            🚫
-          </motion.div>
+        {/* Ícono SVG animado */}
+        <motion.div
+          style={{
+            width: "140px",
+            height: "140px",
+            margin: "0 auto 30px",
+            position: "relative",
+          }}
+          whileHover="hover"
+          whileTap="tap"
+          variants={iconVariants}
+          animate={{ y: [0, -10, 0] }}
+          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+        >
+          <svg viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="#6c5ce7" strokeWidth="2" />
+            <line
+              x1="8"
+              y1="8"
+              x2="16"
+              y2="16"
+              stroke="#6c5ce7"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <line
+              x1="16"
+              y1="8"
+              x2="8"
+              y2="16"
+              stroke="#6c5ce7"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+        </motion.div>
+
+        {/* Código de error */}
+        <div
+          style={{
+            display: "inline-block",
+            background: "#6c5ce7",
+            color: "white",
+            padding: "6px 18px",
+            borderRadius: "999px",
+            fontSize: "0.95rem",
+            fontWeight: "700",
+            letterSpacing: "0.5px",
+            marginBottom: "18px",
+          }}
+        >
+          ERROR 403
         </div>
 
-        <div className="badge bg-primary text-white mb-3 fs-6">403</div>
+        <h1
+          style={{
+            fontSize: "2.2rem",
+            color: "#2d3436",
+            margin: "16px 0",
+            fontWeight: "800",
+          }}
+        >
+          Acceso denegado
+        </h1>
 
-        <h1 className="mb-3 fw-bold fs-3">Acceso denegado</h1>
-        <p className="text-muted mb-4">
+        <p
+          style={{
+            fontSize: "1.1rem",
+            color: "#636e72",
+            marginBottom: "30px",
+            lineHeight: "1.8",
+          }}
+        >
           No tienes permiso para acceder a esta página o recurso.
         </p>
 
-        <motion.a
-          href="/"
-          className="btn btn-primary px-4"
-          whileHover={{ scale: 1.05 }}
+        <motion.button
+          style={{
+            background: "#6c5ce7",
+            color: "white",
+            border: "none",
+            padding: "14px 36px",
+            borderRadius: "10px",
+            fontSize: "1rem",
+            fontWeight: "600",
+            cursor: "pointer",
+            boxShadow: "0 4px 15px rgba(108, 92, 231, 0.3)",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            margin: "0 auto",
+          }}
+          whileHover={{ scale: 1.06, backgroundColor: "#5c47d2" }}
           whileTap={{ scale: 0.95 }}
+          onHoverStart={() => setIsHovered(true)}
+          onHoverEnd={() => setIsHovered(false)}
+          onClick={() => window.location.href = "/"}
         >
+          <motion.span
+            animate={{
+              x: isHovered ? [0, 6, -6, 0] : 0,
+            }}
+            transition={{ duration: 0.6 }}
+          >
+            ←
+          </motion.span>
           Volver al inicio
-        </motion.a>
+        </motion.button>
       </motion.div>
     </motion.div>
   );

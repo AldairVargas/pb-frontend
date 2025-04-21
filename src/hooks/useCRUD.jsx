@@ -1,13 +1,23 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const useCRUD = (initialUrl, initialHeaders = {}) => {
   const [data, setData] = useState(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate(); // ✅ para redirigir
 
-  // Usar useMemo para que no cambie la referencia de headers en cada render
   const memoizedHeaders = useMemo(() => initialHeaders, []);
+
+  // ✅ Manejar errores HTTP específicos
+  const handleHttpError = (err) => {
+    const status = err?.response?.status;
+    if (status === 401) navigate("/401");
+    else if (status === 403) navigate("/403");
+    else if (status === 404) navigate("/404");
+    else if (status === 500) navigate("/500");
+  };
 
   const fetchData = useCallback(async (additionalHeaders = {}) => {
     setLoading(true);
@@ -15,13 +25,14 @@ const useCRUD = (initialUrl, initialHeaders = {}) => {
       const response = await axios.get(initialUrl, {
         headers: {
           ...memoizedHeaders,
-          ...additionalHeaders
-        }
+          ...additionalHeaders,
+        },
       });
       setData(response.data);
       setError(null);
     } catch (err) {
       setError(err);
+      handleHttpError(err); // ✅ redirige
       throw err;
     } finally {
       setLoading(false);
@@ -42,14 +53,15 @@ const useCRUD = (initialUrl, initialHeaders = {}) => {
         headers: {
           'Content-Type': 'application/json',
           ...memoizedHeaders,
-          ...additionalHeaders
-        }
+          ...additionalHeaders,
+        },
       };
       const response = await axios(config);
       fetchData();
       return response.data;
     } catch (err) {
       setError(err);
+      handleHttpError(err); // ✅ redirige
       throw err;
     } finally {
       setLoading(false);
@@ -62,12 +74,13 @@ const useCRUD = (initialUrl, initialHeaders = {}) => {
       await axios.delete(url, {
         headers: {
           ...memoizedHeaders,
-          ...additionalHeaders
-        }
+          ...additionalHeaders,
+        },
       });
       fetchData();
     } catch (err) {
       setError(err);
+      handleHttpError(err); // ✅ redirige
       throw err;
     } finally {
       setLoading(false);
@@ -80,12 +93,13 @@ const useCRUD = (initialUrl, initialHeaders = {}) => {
       const response = await axios.get(url, {
         headers: {
           ...memoizedHeaders,
-          ...additionalHeaders
-        }
+          ...additionalHeaders,
+        },
       });
       return response.data;
     } catch (err) {
       setError(err);
+      handleHttpError(err); // ✅ redirige
       throw err;
     } finally {
       setLoading(false);
@@ -99,7 +113,7 @@ const useCRUD = (initialUrl, initialHeaders = {}) => {
     fetchData,
     loading,
     readItem,
-    saveData
+    saveData,
   };
 };
 
